@@ -46,7 +46,7 @@ jobs:
         push: true
         tags: |
           husarion/navigation2:${{ matrix.ros-distro }}
-          husarion/navigation2:${{ matrix.ros-distro }}-$SHORT_DATE
+          husarion/navigation2:${{ matrix.ros-distro }}-${{ env.SHORT_DATE }}
         cache-from: type=registry,ref=husarion/navigation2:${{ matrix.ros-distro }} 
         cache-to: type=inline
 

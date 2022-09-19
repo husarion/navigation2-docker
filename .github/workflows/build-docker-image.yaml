@@ -44,9 +44,9 @@ jobs:
         platforms: linux/amd64, linux/arm64
         build-args: ROS_DISTRO=${{ matrix.ros-distro }}
         push: true
-        tags: 
-          - husarion/navigation2:${{ matrix.ros-distro }}
-          - husarion/navigation2:${{ matrix.ros-distro }}-$SHORT_DATE
+        tags: |
+          husarion/navigation2:${{ matrix.ros-distro }}
+          husarion/navigation2:${{ matrix.ros-distro }}-$SHORT_DATE
         cache-from: type=registry,ref=husarion/navigation2:${{ matrix.ros-distro }} 
         cache-to: type=inline
 

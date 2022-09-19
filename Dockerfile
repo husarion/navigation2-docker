@@ -14,4 +14,8 @@ RUN apt update && apt install -y \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+COPY ./nav2_params /nav2_params
+
+RUN if [[ $ROS_DISTRO == "humble" ]] ; then sed -i 's/robot_model_type: "differential"/robot_model_type: nav2_amcl::DifferentialMotionModel/g' /nav2_params/rosbot2_amcl.yaml ; fi
+
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc

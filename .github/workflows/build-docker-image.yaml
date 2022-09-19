@@ -34,6 +34,9 @@ jobs:
     - name: Print branch name
       run: echo ${{ github.ref_name}}
 
+    - name: Set SHORT_DATE env
+      run: echo "SHORT_DATE=$(date +%y-%m-%d)" >> $GITHUB_ENV
+
     - name: Build and push (production)
       if: github.ref_name == 'main'
       uses: docker/build-push-action@v2
@@ -41,7 +44,9 @@ jobs:
         platforms: linux/amd64, linux/arm64
         build-args: ROS_DISTRO=${{ matrix.ros-distro }}
         push: true
-        tags: husarion/navigation2:${{ matrix.ros-distro }} 
+        tags: 
+          - husarion/navigation2:${{ matrix.ros-distro }}
+          - husarion/navigation2:${{ matrix.ros-distro }}-$SHORT_DATE
         cache-from: type=registry,ref=husarion/navigation2:${{ matrix.ros-distro }} 
         cache-to: type=inline
 

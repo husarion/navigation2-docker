@@ -2,8 +2,7 @@ name: Build/Publish Docker Image
 
 on:
   push:
-    branches:
-      - 'main'
+  workflow_dispatch:
   
 jobs:
   build:
@@ -11,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ros-distro: [galactic, humble]
+        ros-distro: [foxy, galactic, humble]
 
     steps:
     - name: Checkout
@@ -31,8 +30,12 @@ jobs:
         registry: docker.io
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-        
-    - name: Build and push
+
+    - name: Print branch name
+      run: echo ${{ github.ref_name}}
+
+    - name: Build and push (production)
+      if: github.ref_name == 'main'
       uses: docker/build-push-action@v2
       with:
         platforms: linux/amd64, linux/arm64
@@ -40,4 +43,15 @@ jobs:
         push: true
         tags: husarion/navigation2:${{ matrix.ros-distro }} 
         cache-from: type=registry,ref=husarion/navigation2:${{ matrix.ros-distro }} 
+        cache-to: type=inline
+
+    - name: Build and push (testing)
+      if: github.ref_name != 'main'
+      uses: docker/build-push-action@v2
+      with:
+        platforms: linux/amd64, linux/arm64
+        build-args: ROS_DISTRO=${{ matrix.ros-distro }}
+        push: true
+        tags: husarion/navigation2:${{ matrix.ros-distro }}-${{ github.head_ref || github.ref_name }} 
+        cache-from: type=registry,ref=husarion/navigation2:${{ matrix.ros-distro }}-${{ github.head_ref || github.ref_name }} 
         cache-to: type=inline

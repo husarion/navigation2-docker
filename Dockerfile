@@ -4,7 +4,7 @@ FROM ros:$ROS_DISTRO-ros-core
 
 SHELL ["/bin/bash", "-c"]
 
-RUN apt update && apt install -y \
+RUN apt update && apt upgrade -y && apt install -y \
         ros-$ROS_DISTRO-rmw-fastrtps-cpp \
         ros-$ROS_DISTRO-rmw-cyclonedds-cpp \
         ros-$ROS_DISTRO-navigation2 \

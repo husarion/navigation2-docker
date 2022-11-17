@@ -8,12 +8,14 @@ RUN apt update && apt upgrade -y && apt install -y \
         ros-$ROS_DISTRO-rmw-fastrtps-cpp \
         ros-$ROS_DISTRO-rmw-cyclonedds-cpp \
         ros-$ROS_DISTRO-navigation2 \
-        ros-$ROS_DISTRO-nav2-bringup && \
+        ros-$ROS_DISTRO-nav2-bringup \
+		gettext-base && \
     apt-get autoremove -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 COPY ./nav2_params /nav2_params
+COPY ros_entrypoint.sh /
 
 ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 

@@ -74,7 +74,7 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         platforms: ${{ matrix.platforms }}
-        push: true
+        outputs: imageid
         build-args: |
           ROS_DISTRO=${{ matrix.ros-distro }}
         tags: |

@@ -91,7 +91,7 @@ jobs:
           && 
         ( github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true )
           &&
-        ${{ inputs.build_type }} != 'stable'
+        inputs.build_type != 'stable'
       uses: docker/build-push-action@v3
       with:
         push: false
@@ -106,7 +106,7 @@ jobs:
           && 
         ( github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true )
           &&
-        ${{ inputs.build_type }} != 'stable'
+        inputs.build_type != 'stable'
       run: echo "VERSION=$(docker run --rm husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-nightly bash -c "cat /version.txt")" >> $GITHUB_ENV
 
     - name: "[main branch] Build and push"
@@ -115,7 +115,7 @@ jobs:
           && 
         ( github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true )
           &&
-        ${{ inputs.build_type }} != 'stable'
+        inputs.build_type != 'stable'
       uses: docker/build-push-action@v3
       with:
         platforms: ${{ matrix.platforms }}
@@ -136,9 +136,9 @@ jobs:
           && 
         github.event_name == 'workflow_dispatch'
           && 
-        ${{ inputs.build_type }} == 'stable'
+        inputs.build_type == 'stable'
           &&
-        ${{ matrix.distro }} == ${{ inputs.target_distro }}
+        matrix.distro == inputs.target_distro
       run: |
         mkdir temp
         echo "FROM husarion/${{ env.IMAGE_NAME }}:${{ inputs.target_distro }}-${{ inputs.target_release }}-${{ inputs.target_date }}" > temp/Dockerfile
@@ -149,9 +149,9 @@ jobs:
           && 
         github.event_name == 'workflow_dispatch'
           && 
-        ${{ inputs.build_type }} == 'stable'
+        inputs.build_type == 'stable'
           &&
-        ${{ matrix.distro }} == ${{ inputs.target_distro }}
+        matrix.distro == inputs.target_distro
       uses: docker/build-push-action@v3
       with:
         platforms: ${{ matrix.platforms }}

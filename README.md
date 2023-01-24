@@ -10,7 +10,7 @@ Using in Docker Compose:
 
 ```yaml
   nav2:
-    image: husarion/navigation2:galactic
+    image: husarion/navigation2:humble
     restart: unless-stopped
     volumes: 
       - ./config/nav2_params.yaml:/nav2_params.yaml

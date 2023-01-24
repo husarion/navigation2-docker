@@ -13,6 +13,8 @@ RUN apt update && apt upgrade -y && apt install -y \
 
 COPY ./nav2_params /nav2_params
 
+RUN echo $(dpkg -s ros-$ROS_DISTRO-navigation2 | grep 'Version' | sed -r 's/Version:\s([0-9]+.[0-9]+.[0-9]*).*/\1/g') >> /version.txt
+
 RUN if [[ $ROS_DISTRO == "humble" ]] ; then sed -i 's/robot_model_type: "differential"/robot_model_type: nav2_amcl::DifferentialMotionModel/g' /nav2_params/rosbot2_amcl.yaml ; fi
 
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc

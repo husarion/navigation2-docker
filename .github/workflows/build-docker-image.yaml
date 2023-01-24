@@ -66,12 +66,6 @@ jobs:
     - name: List docker images 1
       run: docker images
 
-    - name: List docker images 2
-      run: docker image ls --filter=repository=husarion
-
-    - name: List docker images
-      run: docker inspect husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-nightly
-
     - name: Set VERSION env
       run: echo "VERSION=$(docker run --rm -it husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-nightly bash -c "cat /version.txt")" >> $GITHUB_ENV
 

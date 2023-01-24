@@ -2,6 +2,33 @@ name: Build/Publish Docker Image
 
 on: 
   workflow_dispatch:
+    inputs:
+      build_type:
+        description: "Is it a \"development\" or a \"stable\" release?"
+        required: true
+        default: 'development'
+        type: choice
+        options:
+          - development
+          - stable
+      target_distro:
+        description: "In case of \"stable\" release specify the ROS distro of the existing docker image (eg. humble)"
+        type: string
+        default: "ardent"
+        reguired: false
+      target_release:
+        description: "In case of \"stable\" release specify the version of the existing docker image (eg. 1.0.12)"
+        type: string
+        default: "0.0.0"
+        reguired: false
+      target_date:
+        description: "In case of \"stable\" release specify the date of the existing docker image in format YYYYMMDD (eg. 20220124)"
+        type: string
+        default: "20131206"
+        reguired: false
+  pull_request:
+    types:
+      - closed
 
 jobs:
   build:
@@ -48,8 +75,14 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+    # ===========================================
+    # Nightly releases
+    # ===========================================
     - name: "[main branch] Just build the image to retrieve the version" 
-      if: github.ref_name == 'main' && github.event_name == 'workflow_dispatch'
+      if: >
+        github.ref_name == 'main' 
+        && 
+        ( github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true )
       uses: docker/build-push-action@v3
       with:
         push: false
@@ -70,8 +103,11 @@ jobs:
         echo "SHORT_DATE=${{ env.SHORT_DATE }}"
         echo "VERSION=${{ env.VERSION }}"
 
-    - name: "[main branch] Build and push with known version"
-      if: github.ref_name == 'main' && github.event_name == 'workflow_dispatch'
+    - name: "[main branch] Build and push"
+      if: >
+        github.ref_name == 'main' 
+        && 
+        ( github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true )
       uses: docker/build-push-action@v3
       with:
         platforms: ${{ matrix.platforms }}
@@ -82,7 +118,40 @@ jobs:
           husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-nightly
           husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-${{ env.VERSION }}-${{ env.SHORT_DATE }}
 
-    - name: (feature branch) Build and push 
+    # ===========================================
+    # Stable releases
+    # ===========================================
+
+    - name: Pull stable releases from a container registry
+      if: >
+        github.ref_name == 'main' 
+        && 
+        ( github.event_name == 'workflow_dispatch' ||  ${{ inputs.build_type }} == 'stable' )
+      run: |
+        mkdir temp
+        echo "FROM husarion/${{ env.IMAGE_NAME }}:${{ inputs.target_distro }}-${{ inputs.target_release }}-${{ inputs.target_date }}" > temp/Dockerfile
+
+    - name: "[main branch] Build and push"
+      if: >
+        github.ref_name == 'main' 
+        && 
+        ( github.event_name == 'workflow_dispatch' ||  ${{ inputs.build_type }} == 'stable' )
+      uses: docker/build-push-action@v3
+      with:
+        platforms: ${{ matrix.platforms }}
+        context: ./temp
+        push: true
+        build-args: |
+          ROS_DISTRO=${{ inputs.target_distro }}
+        tags: |
+          husarion/${{ env.IMAGE_NAME }}:${{ inputs.target_distro }}
+          husarion/${{ env.IMAGE_NAME }}:${{ inputs.target_distro }}-${{ inputs.target_release }}-${{ inputs.target_date }}-stable
+
+    # ===========================================
+    # Feature branch releases
+    # ===========================================
+
+    - name: "[feature branch] Build and push"
       if: github.ref_name != 'main' && github.event_name == 'workflow_dispatch'
       uses: docker/build-push-action@v3
       with:

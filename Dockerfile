@@ -1,4 +1,4 @@
-ARG ROS_DISTRO=galactic
+ARG ROS_DISTRO=humble
 
 FROM husarnet/ros:$ROS_DISTRO-ros-core
 

@@ -23,7 +23,7 @@ jobs:
       run: echo ${{ github.ref_name}}
 
     - name: Set SHORT_DATE env
-      run: echo "SHORT_DATE=$(date +%y%m%d)" >> $GITHUB_ENV
+      run: echo "SHORT_DATE=$(date +%Y%m%d)" >> $GITHUB_ENV
 
     - name: Set IMAGE_NAME env
       run: |
@@ -58,29 +58,28 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         platforms: ${{ matrix.platforms }}
-        push: false
+        load: true # shorthand for --output=type=docker
         build-args: |
           ROS_DISTRO=${{ matrix.ros-distro }}
-        tags: husarion/navigation2:${{ matrix.ros-distro }}-nightly
+        tags: husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-nightly
 
     - name: List docker images
       run: docker image ls
 
     - name: Set VERSION env
-      run: echo "VERSION=$(docker run --rm -it husarion/navigation2:${{ matrix.ros-distro }}-nightly bash -c "cat /version.txt")" >> $GITHUB_ENV
+      run: echo "VERSION=$(docker run --rm -it husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-nightly bash -c "cat /version.txt")" >> $GITHUB_ENV
 
     - name: Build and push with known version (main branch)
       if: github.ref_name == 'main' && github.event_name == 'workflow_dispatch'
       uses: docker/build-push-action@v3
       with:
         platforms: ${{ matrix.platforms }}
-        load: true
         push: true
         build-args: |
           ROS_DISTRO=${{ matrix.ros-distro }}
         tags: |
-          husarion/navigation2:${{ matrix.ros-distro }}-nightly
-          husarion/navigation2:${{ matrix.ros-distro }}-${{ env.VERSION }}-${{ env.SHORT_DATE }}
+          husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-nightly
+          husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-${{ env.VERSION }}-${{ env.SHORT_DATE }}
 
     - name: Build and push (feature branch)
       if: github.ref_name != 'main' && github.event_name == 'workflow_dispatch'
@@ -90,4 +89,4 @@ jobs:
         push: true
         build-args: |
           ROS_DISTRO=${{ matrix.ros-distro }}
-        tags: husarion/navigation2:${{ matrix.ros-distro }}-${{ github.head_ref || github.ref_name }}
+        tags: husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-${{ github.head_ref || github.ref_name }}

@@ -30,11 +30,6 @@ jobs:
         echo "repository name is: ${{ github.event.repository.name }}"
         echo "IMAGE_NAME=$(echo "${{ github.event.repository.name }}" | sed -r 's/([0-9a-zA-Z]+)-docker/\1/g')" >> $GITHUB_ENV
 
-    - name: Print envs
-      run: |
-        echo "IMAGE_NAME=${{ env.IMAGE_NAME }}"
-        echo "SHORT_DATE=${{ env.SHORT_DATE }}"
-
     - name: Checkout
       uses: actions/checkout@v3
 
@@ -53,7 +48,7 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Just build (main branch)
+    - name: (main branch) Just build the image to retrieve the version 
       if: github.ref_name == 'main' && github.event_name == 'workflow_dispatch'
       uses: docker/build-push-action@v3
       with:
@@ -67,26 +62,32 @@ jobs:
       run: docker images
 
     - name: Set VERSION env
-      run: echo "VERSION=$(docker run --rm -it husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-nightly bash -c "cat /version.txt")" >> $GITHUB_ENV
+      run: echo "VERSION=$(docker run --rm husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-nightly bash -c "cat /version.txt")" >> $GITHUB_ENV
 
-    - name: Build and push with known version (main branch)
-      if: github.ref_name == 'main' && github.event_name == 'workflow_dispatch'
-      uses: docker/build-push-action@v3
-      with:
-        platforms: ${{ matrix.platforms }}
-        push: true
-        build-args: |
-          ROS_DISTRO=${{ matrix.ros-distro }}
-        tags: |
-          husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-nightly
-          husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-${{ env.VERSION }}-${{ env.SHORT_DATE }}
+    - name: Print envs
+      run: |
+        echo "IMAGE_NAME=${{ env.IMAGE_NAME }}"
+        echo "SHORT_DATE=${{ env.SHORT_DATE }}"
+        echo "VERSION=${{ env.VERSION }}"
 
-    - name: Build and push (feature branch)
-      if: github.ref_name != 'main' && github.event_name == 'workflow_dispatch'
-      uses: docker/build-push-action@v3
-      with:
-        platforms: ${{ matrix.platforms }}
-        push: true
-        build-args: |
-          ROS_DISTRO=${{ matrix.ros-distro }}
-        tags: husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-${{ github.head_ref || github.ref_name }}
+    # - name: (main branch) Build and push with known version
+    #   if: github.ref_name == 'main' && github.event_name == 'workflow_dispatch'
+    #   uses: docker/build-push-action@v3
+    #   with:
+    #     platforms: ${{ matrix.platforms }}
+    #     push: true
+    #     build-args: |
+    #       ROS_DISTRO=${{ matrix.ros-distro }}
+    #     tags: |
+    #       husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-nightly
+    #       husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-${{ env.VERSION }}-${{ env.SHORT_DATE }}
+
+    # - name: (feature branch) Build and push 
+    #   if: github.ref_name != 'main' && github.event_name == 'workflow_dispatch'
+    #   uses: docker/build-push-action@v3
+    #   with:
+    #     platforms: ${{ matrix.platforms }}
+    #     push: true
+    #     build-args: |
+    #       ROS_DISTRO=${{ matrix.ros-distro }}
+    #     tags: husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-${{ github.head_ref || github.ref_name }}

@@ -60,8 +60,10 @@ jobs:
         echo "IMAGE_NAME=${{ env.IMAGE_NAME }}"
         echo "SHORT_DATE=${{ env.SHORT_DATE }}"
         echo "inputs.build_type=${{ inputs.build_type }}"
+        echo "inputs.target_distro=${{ inputs.target_distro }}"
         echo "github.event_name=${{ github.event_name }}"
         echo "github.ref_name=${{ github.ref_name }}"
+        echo "matrix.ros-distro=${{ matrix.ros-distro }}"
 
     - name: Checkout
       uses: actions/checkout@v3
@@ -138,7 +140,7 @@ jobs:
           && 
         inputs.build_type == 'stable'
           &&
-        matrix.distro == inputs.target_distro
+        matrix.ros-distro == inputs.target_distro
       run: |
         mkdir temp
         echo "FROM husarion/${{ env.IMAGE_NAME }}:${{ inputs.target_distro }}-${{ inputs.target_release }}-${{ inputs.target_date }}" > temp/Dockerfile
@@ -151,7 +153,7 @@ jobs:
           && 
         inputs.build_type == 'stable'
           &&
-        matrix.distro == inputs.target_distro
+        matrix.ros-distro == inputs.target_distro
       uses: docker/build-push-action@v3
       with:
         platforms: ${{ matrix.platforms }}

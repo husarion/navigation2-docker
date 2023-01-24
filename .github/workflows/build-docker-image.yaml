@@ -48,7 +48,7 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: (main branch) Just build the image to retrieve the version 
+    - name: "[main branch] Just build the image to retrieve the version" 
       if: github.ref_name == 'main' && github.event_name == 'workflow_dispatch'
       uses: docker/build-push-action@v3
       with:
@@ -70,24 +70,24 @@ jobs:
         echo "SHORT_DATE=${{ env.SHORT_DATE }}"
         echo "VERSION=${{ env.VERSION }}"
 
-    # - name: (main branch) Build and push with known version
-    #   if: github.ref_name == 'main' && github.event_name == 'workflow_dispatch'
-    #   uses: docker/build-push-action@v3
-    #   with:
-    #     platforms: ${{ matrix.platforms }}
-    #     push: true
-    #     build-args: |
-    #       ROS_DISTRO=${{ matrix.ros-distro }}
-    #     tags: |
-    #       husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-nightly
-    #       husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-${{ env.VERSION }}-${{ env.SHORT_DATE }}
+    - name: "[main branch] Build and push with known version"
+      if: github.ref_name == 'main' && github.event_name == 'workflow_dispatch'
+      uses: docker/build-push-action@v3
+      with:
+        platforms: ${{ matrix.platforms }}
+        push: true
+        build-args: |
+          ROS_DISTRO=${{ matrix.ros-distro }}
+        tags: |
+          husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-nightly
+          husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-${{ env.VERSION }}-${{ env.SHORT_DATE }}
 
-    # - name: (feature branch) Build and push 
-    #   if: github.ref_name != 'main' && github.event_name == 'workflow_dispatch'
-    #   uses: docker/build-push-action@v3
-    #   with:
-    #     platforms: ${{ matrix.platforms }}
-    #     push: true
-    #     build-args: |
-    #       ROS_DISTRO=${{ matrix.ros-distro }}
-    #     tags: husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-${{ github.head_ref || github.ref_name }}
+    - name: (feature branch) Build and push 
+      if: github.ref_name != 'main' && github.event_name == 'workflow_dispatch'
+      uses: docker/build-push-action@v3
+      with:
+        platforms: ${{ matrix.platforms }}
+        push: true
+        build-args: |
+          ROS_DISTRO=${{ matrix.ros-distro }}
+        tags: husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-${{ github.head_ref || github.ref_name }}

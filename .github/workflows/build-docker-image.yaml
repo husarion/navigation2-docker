@@ -29,6 +29,7 @@ on:
   pull_request:
     types:
       - closed
+      - opened
 
 jobs:
   build:
@@ -82,6 +83,20 @@ jobs:
         registry: docker.io
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
+    
+    # ===========================================
+    # Test on PR opened
+    # ===========================================
+
+    - name: "[feature] [dev] Test on PR opened" 
+      if: github.event.pull_request.opened == true
+      uses: docker/build-push-action@v3
+      with:
+        platforms: ${{ matrix.platforms }}
+        push: false
+        build-args: |
+          ROS_DISTRO=${{ matrix.ros-distro }}
+        tags: husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-nightly
 
     # ===========================================
     # Nightly releases
@@ -163,6 +178,7 @@ jobs:
           ROS_DISTRO=${{ inputs.target_distro }}
         tags: |
           husarion/${{ env.IMAGE_NAME }}:${{ inputs.target_distro }}
+          husarion/${{ env.IMAGE_NAME }}:${{ inputs.target_distro }}-nightly
           husarion/${{ env.IMAGE_NAME }}:${{ inputs.target_distro }}-${{ inputs.target_release }}
           husarion/${{ env.IMAGE_NAME }}:${{ inputs.target_distro }}-${{ inputs.target_release }}-${{ inputs.target_date }}
           husarion/${{ env.IMAGE_NAME }}:${{ inputs.target_distro }}-${{ inputs.target_release }}-${{ inputs.target_date }}-stable

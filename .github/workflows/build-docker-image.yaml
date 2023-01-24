@@ -59,6 +59,9 @@ jobs:
       run: |
         echo "IMAGE_NAME=${{ env.IMAGE_NAME }}"
         echo "SHORT_DATE=${{ env.SHORT_DATE }}"
+        echo "inputs.build_type=${{ inputs.build_type }}"
+        echo "github.event_name=${{ github.event_name }}"
+        echo "github.ref_name=${{ github.ref_name }}"
 
     - name: Checkout
       uses: actions/checkout@v3
@@ -81,6 +84,7 @@ jobs:
     # ===========================================
     # Nightly releases
     # ===========================================
+
     - name: "[main branch] Just build the image to retrieve the version" 
       if: >
         github.ref_name == 'main' 

@@ -87,7 +87,7 @@ jobs:
     # Nightly releases
     # ===========================================
 
-    - name: "[main branch][dev] Just build the image to retrieve the version" 
+    - name: "[main] [dev] Just build the image to retrieve the version" 
       if: >
         github.ref_name == 'main' 
           && 
@@ -102,7 +102,7 @@ jobs:
           ROS_DISTRO=${{ matrix.ros-distro }}
         tags: husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-nightly
 
-    - name: "[main branch][dev] Set VERSION env"
+    - name: "[main] [dev] Set VERSION env"
       if: >
         github.ref_name == 'main' 
           && 
@@ -111,7 +111,7 @@ jobs:
         inputs.build_type != 'stable'
       run: echo "VERSION=$(docker run --rm husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-nightly bash -c "cat /version.txt")" >> $GITHUB_ENV
 
-    - name: "[main branch][dev] Build and push"
+    - name: "[main] [dev] Build and push"
       if: >
         github.ref_name == 'main' 
           && 
@@ -132,7 +132,7 @@ jobs:
     # Stable releases
     # ===========================================
 
-    - name: "[main branch][stable] Pull stable releases from a container registry"
+    - name: "[main] [stable] Pull stable releases from a container registry"
       if: >
         github.ref_name == 'main' 
           && 
@@ -145,7 +145,7 @@ jobs:
         mkdir temp
         echo "FROM husarion/${{ env.IMAGE_NAME }}:${{ inputs.target_distro }}-${{ inputs.target_release }}-${{ inputs.target_date }}" > temp/Dockerfile
 
-    - name: "[main branch][stable] Build and push"
+    - name: "[main] [stable] Build and push"
       if: >
         github.ref_name == 'main' 
           && 
@@ -163,13 +163,15 @@ jobs:
           ROS_DISTRO=${{ inputs.target_distro }}
         tags: |
           husarion/${{ env.IMAGE_NAME }}:${{ inputs.target_distro }}
+          husarion/${{ env.IMAGE_NAME }}:${{ inputs.target_distro }}-${{ inputs.target_release }}
+          husarion/${{ env.IMAGE_NAME }}:${{ inputs.target_distro }}-${{ inputs.target_release }}-${{ inputs.target_date }}
           husarion/${{ env.IMAGE_NAME }}:${{ inputs.target_distro }}-${{ inputs.target_release }}-${{ inputs.target_date }}-stable
 
     # ===========================================
     # Feature branch releases
     # ===========================================
 
-    - name: "[feature branch] Build and push"
+    - name: "[feature] Build and push"
       if: github.ref_name != 'main' && github.event_name == 'workflow_dispatch'
       uses: docker/build-push-action@v3
       with:

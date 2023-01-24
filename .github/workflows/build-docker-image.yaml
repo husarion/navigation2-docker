@@ -29,7 +29,11 @@ jobs:
       run: |
         echo "repository name is: ${{ github.event.repository.name }}"
         echo "IMAGE_NAME=$(echo "${{ github.event.repository.name }}" | sed -r 's/([0-9a-zA-Z]+)-docker/\1/g')" >> $GITHUB_ENV
+
+    - name: Print envs
+      rune: |
         echo "IMAGE_NAME=${{ env.IMAGE_NAME }}"
+        echo "SHORT_DATE=${{ env.SHORT_DATE }}"
 
     - name: Checkout
       uses: actions/checkout@v3
@@ -54,7 +58,6 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         platforms: ${{ matrix.platforms }}
-        load: true
         push: false
         build-args: |
           ROS_DISTRO=${{ matrix.ros-distro }}

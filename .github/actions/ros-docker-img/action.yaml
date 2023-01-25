@@ -11,12 +11,15 @@ runs:
   steps:
     - name: Print branch name
       run: echo ${{ github.ref_name}}
+      shell: bash
 
     - name: Set SHORT_DATE env
       run: echo "SHORT_DATE=$(date +%Y%m%d)" >> $GITHUB_ENV
+      shell: bash
 
     - name: Set IMAGE_NAME env
       run: echo "IMAGE_NAME=$(echo "${{ github.event.repository.name }}" | sed -r 's/([0-9a-zA-Z]+)-docker/\1/g')" >> $GITHUB_ENV
+      shell: bash
 
     - name: Print envs
       run: |
@@ -27,6 +30,7 @@ runs:
         echo "github.event_name=${{ github.event_name }}"
         echo "github.ref_name=${{ github.ref_name }}"
         echo "matrix.ros-distro=${{ matrix.ros-distro }}"
+      shell: bash
 
     - name: Checkout
       uses: actions/checkout@v3
@@ -87,6 +91,7 @@ runs:
           &&
         inputs.build_type != 'stable'
       run: echo "VERSION=$(docker run --rm husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-nightly bash -c "cat /version.txt")" >> $GITHUB_ENV
+      shell: bash
 
     - name: "[main] [dev] Build and push"
       if: >
@@ -121,7 +126,8 @@ runs:
       run: |
         mkdir temp
         echo "FROM husarion/${{ env.IMAGE_NAME }}:${{ inputs.target_distro }}-${{ inputs.target_release }}-${{ inputs.target_date }}" > temp/Dockerfile
-
+      shell: bash
+      
     - name: "[main] [stable] Build and push"
       if: >
         github.ref_name == 'main' 

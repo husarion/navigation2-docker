@@ -51,6 +51,9 @@ jobs:
 
       - name: Build Docker Image
         uses: ./.github/actions/ros-docker-img
+        with:
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-token:  ${{ secrets.DOCKERHUB_TOKEN }}
 
     # - name: Print branch name
     #   run: echo ${{ github.ref_name}}

@@ -47,7 +47,7 @@ jobs:
     steps:
 
       - name: Build Docker Image
-        uses: ./.github/actions/build-docker-img
+        uses: ./.github/actions/ros-docker-img
 
     # - name: Print branch name
     #   run: echo ${{ github.ref_name}}

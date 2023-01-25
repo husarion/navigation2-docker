@@ -1,0 +1,160 @@
+name: 'ROS Docker Image'
+description: 'Publish docker images with tags containing ROS distro, package version, release date and manage stable releases.'
+inputs: {}
+outputs: {}
+branding:
+  icon: 'box'
+  color: 'red'
+  
+runs:
+  using: "composite"
+  steps:
+    - name: Print branch name
+      run: echo ${{ github.ref_name}}
+
+    - name: Set SHORT_DATE env
+      run: echo "SHORT_DATE=$(date +%Y%m%d)" >> $GITHUB_ENV
+
+    - name: Set IMAGE_NAME env
+      run: echo "IMAGE_NAME=$(echo "${{ github.event.repository.name }}" | sed -r 's/([0-9a-zA-Z]+)-docker/\1/g')" >> $GITHUB_ENV
+
+    - name: Print envs
+      run: |
+        echo "IMAGE_NAME=${{ env.IMAGE_NAME }}"
+        echo "SHORT_DATE=${{ env.SHORT_DATE }}"
+        echo "inputs.build_type=${{ inputs.build_type }}"
+        echo "inputs.target_distro=${{ inputs.target_distro }}"
+        echo "github.event_name=${{ github.event_name }}"
+        echo "github.ref_name=${{ github.ref_name }}"
+        echo "matrix.ros-distro=${{ matrix.ros-distro }}"
+
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+      with:
+        version: latest
+
+    - name: Login to Docker Registry
+      uses: docker/login-action@v2
+      with:
+        registry: docker.io
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    
+    # ===========================================
+    # Test on PR opened
+    # ===========================================
+
+    - name: "[feature] [dev] Test on PR opened" 
+      if: github.event.pull_request.opened == true
+      uses: docker/build-push-action@v3
+      with:
+        platforms: ${{ matrix.platforms }}
+        push: false
+        build-args: |
+          ROS_DISTRO=${{ matrix.ros-distro }}
+        tags: husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-nightly
+
+    # ===========================================
+    # Nightly releases
+    # ===========================================
+
+    - name: "[main] [dev] Just build the image to retrieve the version" 
+      if: >
+        github.ref_name == 'main' 
+          && 
+        ( github.event_name == 'workflow_dispatch' || github.event_name == 'repository_dispatch' || github.event.pull_request.merged == true )
+          &&
+        inputs.build_type != 'stable'
+      uses: docker/build-push-action@v3
+      with:
+        push: false
+        load: true
+        build-args: |
+          ROS_DISTRO=${{ matrix.ros-distro }}
+        tags: husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-nightly
+
+    - name: "[main] [dev] Set VERSION env"
+      if: >
+        github.ref_name == 'main' 
+          && 
+        ( github.event_name == 'workflow_dispatch' || github.event_name == 'repository_dispatch' || github.event.pull_request.merged == true )
+          &&
+        inputs.build_type != 'stable'
+      run: echo "VERSION=$(docker run --rm husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-nightly bash -c "cat /version.txt")" >> $GITHUB_ENV
+
+    - name: "[main] [dev] Build and push"
+      if: >
+        github.ref_name == 'main' 
+          && 
+        ( github.event_name == 'workflow_dispatch' || github.event_name == 'repository_dispatch' || github.event.pull_request.merged == true )
+          &&
+        inputs.build_type != 'stable'
+      uses: docker/build-push-action@v3
+      with:
+        platforms: ${{ matrix.platforms }}
+        push: true
+        build-args: |
+          ROS_DISTRO=${{ matrix.ros-distro }}
+        tags: |
+          husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-nightly
+          husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-${{ env.VERSION }}-${{ env.SHORT_DATE }}
+
+    # ===========================================
+    # Stable releases
+    # ===========================================
+
+    - name: "[main] [stable] Pull stable releases from a container registry"
+      if: >
+        github.ref_name == 'main' 
+          && 
+        github.event_name == 'workflow_dispatch'
+          && 
+        inputs.build_type == 'stable'
+          &&
+        matrix.ros-distro == inputs.target_distro
+      run: |
+        mkdir temp
+        echo "FROM husarion/${{ env.IMAGE_NAME }}:${{ inputs.target_distro }}-${{ inputs.target_release }}-${{ inputs.target_date }}" > temp/Dockerfile
+
+    - name: "[main] [stable] Build and push"
+      if: >
+        github.ref_name == 'main' 
+          && 
+        github.event_name == 'workflow_dispatch'
+          && 
+        inputs.build_type == 'stable'
+          &&
+        matrix.ros-distro == inputs.target_distro
+      uses: docker/build-push-action@v3
+      with:
+        platforms: ${{ matrix.platforms }}
+        context: ./temp
+        push: true
+        build-args: |
+          ROS_DISTRO=${{ inputs.target_distro }}
+        tags: |
+          husarion/${{ env.IMAGE_NAME }}:${{ inputs.target_distro }}
+          husarion/${{ env.IMAGE_NAME }}:${{ inputs.target_distro }}-nightly
+          husarion/${{ env.IMAGE_NAME }}:${{ inputs.target_distro }}-${{ inputs.target_release }}
+          husarion/${{ env.IMAGE_NAME }}:${{ inputs.target_distro }}-${{ inputs.target_release }}-${{ inputs.target_date }}
+          husarion/${{ env.IMAGE_NAME }}:${{ inputs.target_distro }}-${{ inputs.target_release }}-${{ inputs.target_date }}-stable
+
+    # ===========================================
+    # Feature branch releases
+    # ===========================================
+
+    - name: "[feature] Build and push"
+      if: github.ref_name != 'main' && github.event_name == 'workflow_dispatch'
+      uses: docker/build-push-action@v3
+      with:
+        platforms: ${{ matrix.platforms }}
+        push: true
+        build-args: |
+          ROS_DISTRO=${{ matrix.ros-distro }}
+        tags: husarion/${{ env.IMAGE_NAME }}:${{ matrix.ros-distro }}-${{ github.head_ref || github.ref_name }}

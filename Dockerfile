@@ -6,7 +6,8 @@ SHELL ["/bin/bash", "-c"]
 
 RUN apt update && apt upgrade -y && apt install -y \
         ros-$ROS_DISTRO-navigation2 \
-        ros-$ROS_DISTRO-nav2-bringup  && \
+        ros-$ROS_DISTRO-nav2-bringup \
+        ros-$ROS_DISTRO-pointcloud-to-laserscan && \
     apt-get autoremove -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*

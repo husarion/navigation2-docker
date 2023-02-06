@@ -2,6 +2,8 @@ ARG ROS_DISTRO=humble
 
 FROM husarnet/ros:$ROS_DISTRO-ros-core
 
+ENV SLAM_MODE=localization
+
 SHELL ["/bin/bash", "-c"]
 
 RUN apt update && apt upgrade -y && apt install -y \
@@ -14,6 +16,9 @@ RUN apt update && apt upgrade -y && apt install -y \
 
 COPY ./nav2_params /nav2_params
 
+COPY healthcheck_* /
+
 RUN echo $(dpkg -s ros-$ROS_DISTRO-navigation2 | grep 'Version' | sed -r 's/Version:\s([0-9]+.[0-9]+.[0-9]*).*/\1/g') >> /version.txt
 
-RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc
+HEALTHCHECK --interval=10s --timeout=10s --start-period=5s --retries=6  \
+    CMD bash -c "source /opt/ros/$ROS_DISTRO/setup.bash && /healthcheck_$SLAM_MODE.py"

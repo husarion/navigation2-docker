@@ -3,6 +3,8 @@ ARG PREFIX=
 
 FROM husarnet/ros:${PREFIX}${ROS_DISTRO}-ros-core
 
+ARG PREFIX
+
 ENV SLAM_MODE=localization
 
 SHELL ["/bin/bash", "-c"]
@@ -21,8 +23,5 @@ COPY healthcheck_* /
 
 RUN echo $(dpkg -s ros-$ROS_DISTRO-navigation2 | grep 'Version' | sed -r 's/Version:\s([0-9]+.[0-9]+.[0-9]*).*/\1/g') >> /version.txt
 
-ENV MYDISTRO=${PREFIX:-ros}
-RUN [[ "$PREFIX" = "vulcanexus-" ]] && export MYDISTRO="vulcanexus"
-
 HEALTHCHECK --interval=10s --timeout=10s --start-period=5s --retries=6  \
-    CMD bash -c "source /opt/$MYDISTRO/$ROS_DISTRO/setup.bash && /healthcheck_$SLAM_MODE.py"
+    CMD bash -c "MYDISTRO=${PREFIX:-ros}; MYDISTRO=${MYDISTRO//-/} && source /opt/$MYDISTRO/$ROS_DISTRO/setup.bash && /healthcheck_$SLAM_MODE.py"

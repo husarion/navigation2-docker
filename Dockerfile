@@ -1,6 +1,8 @@
 ARG ROS_DISTRO=humble
 ARG PREFIX=
 
+# Additional build stage responsible for cloning and building just the MPPI controller from sources
+
 FROM husarnet/ros:${PREFIX}${ROS_DISTRO}-ros-core AS controller_builder
 RUN apt update && apt install -y \
         git \

@@ -1,6 +1,19 @@
 ARG ROS_DISTRO=humble
 ARG PREFIX=
 
+FROM husarnet/ros:${PREFIX}${ROS_DISTRO}-ros-core AS controller_builder
+RUN apt update && apt install -y \
+        git \
+        python3-rosdep \
+        python3-colcon-common-extensions \
+        build-essential && \
+    git clone --branch $ROS_DISTRO https://github.com/ros-planning/navigation2.git src/ && \
+    git -C src/ sparse-checkout set nav2_mppi_controller/** && \
+    rosdep init && rosdep update && \
+    rosdep install -y -r -q --from-paths src --rosdistro $ROS_DISTRO && \
+    source /opt/ros/humble/setup.bash && \
+    colcon build
+
 FROM husarnet/ros:${PREFIX}${ROS_DISTRO}-ros-core
 
 ARG PREFIX
@@ -21,7 +34,9 @@ COPY ./nav2_params /nav2_params
 
 COPY healthcheck_* /
 
+COPY --from=controller_builder /ros2_ws/install /ros2_ws/install
+
 RUN echo $(dpkg -s ros-$ROS_DISTRO-navigation2 | grep 'Version' | sed -r 's/Version:\s([0-9]+.[0-9]+.[0-9]*).*/\1/g') >> /version.txt
 
 HEALTHCHECK --interval=10s --timeout=10s --start-period=5s --retries=6  \
-    CMD bash -c "MYDISTRO=${PREFIX:-ros}; MYDISTRO=${MYDISTRO//-/} && source /opt/$MYDISTRO/$ROS_DISTRO/setup.bash && /healthcheck_$SLAM_MODE.py"
+    CMD bash -c "MYDISTRO=${PREFIX:-ros}; MYDISTRO=${MYDISTRO//-/} && source /opt/$MYDISTRO/$ROS_DISTRO/setup.bash && source /ros2_ws/install/setup.bash && /healthcheck_$SLAM_MODE.py"

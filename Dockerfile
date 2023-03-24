@@ -19,8 +19,8 @@ RUN apt update && apt install -y \
 FROM husarnet/ros:${PREFIX}${ROS_DISTRO}-ros-core
 
 ARG PREFIX
-
 ENV SLAM_MODE=localization
+ENV PREFIX_ENV=$PREFIX
 
 SHELL ["/bin/bash", "-c"]
 
@@ -41,4 +41,5 @@ COPY --from=controller_builder /ros2_ws/install /ros2_ws/install
 RUN echo $(dpkg -s ros-$ROS_DISTRO-navigation2 | grep 'Version' | sed -r 's/Version:\s([0-9]+.[0-9]+.[0-9]*).*/\1/g') >> /version.txt
 
 HEALTHCHECK --interval=10s --timeout=10s --start-period=5s --retries=6  \
-    CMD bash -c "MYDISTRO=${PREFIX:-ros}; MYDISTRO=${MYDISTRO//-/} && source /opt/$MYDISTRO/$ROS_DISTRO/setup.bash && source /ros2_ws/install/setup.bash && /healthcheck_$SLAM_MODE.py"
+    CMD bash -c "MYDISTRO=${PREFIX_ENV:-ros}; MYDISTRO=${MYDISTRO//-/} && source /opt/$MYDISTRO/$ROS_DISTRO/setup.bash && /healthcheck_$SLAM_MODE.py"
+

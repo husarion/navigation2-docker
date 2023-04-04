@@ -7,6 +7,7 @@ FROM husarnet/ros:${ROS_DISTRO}-ros-base AS controller_builder
 RUN apt update && apt install -y \
         git && \
     git clone --branch $ROS_DISTRO https://github.com/ros-planning/navigation2.git src/ && \
+    rm -rf /etc/ros/rosdep/sources.list.d/20-default.list && \
     git -C src/ sparse-checkout set nav2_mppi_controller/** && \
     rosdep init && rosdep update && \
     rosdep install -y -r -q --from-paths src --rosdistro $ROS_DISTRO && \

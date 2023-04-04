@@ -3,12 +3,9 @@ ARG PREFIX=
 
 # Additional build stage responsible for cloning and building just the MPPI controller from sources
 
-FROM husarnet/ros:${PREFIX}${ROS_DISTRO}-ros-core AS controller_builder
+FROM husarnet/ros:${ROS_DISTRO}-ros-base AS controller_builder
 RUN apt update && apt install -y \
-        git \
-        python3-rosdep \
-        python3-colcon-common-extensions \
-        build-essential && \
+        git && \
     git clone --branch $ROS_DISTRO https://github.com/ros-planning/navigation2.git src/ && \
     git -C src/ sparse-checkout set nav2_mppi_controller/** && \
     rosdep init && rosdep update && \

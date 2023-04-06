@@ -11,8 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - ros-distro: humble
-            platforms: "linux/amd64"
+          - platforms: "linux/amd64"
 
     steps:
 
@@ -48,8 +47,7 @@ jobs:
       with:
         platforms: ${{ matrix.platforms }}
         push: true
-        build-args: |
-          ROS_DISTRO=${{ matrix.ros-distro }}
-        tags: husarion/navigation2:${{ matrix.ros-distro }}-test
+        tags: husarion/navigation2:humble-test
+        no-cache: true
 
 

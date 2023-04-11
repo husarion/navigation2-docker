@@ -28,8 +28,8 @@ COPY ./nav2_params /nav2_params
 
 COPY healthcheck_* /
 
-COPY --from=nav2_builder /ros2_ws/install /ros2_ws/install
-# COPY --from=nav2_builder /ros2_ws /ros2_ws
+# COPY --from=nav2_builder /ros2_ws/install /ros2_ws/install
+COPY --from=nav2_builder /ros2_ws /ros2_ws
 
 RUN echo $(dpkg -s ros-$ROS_DISTRO-navigation2 | grep 'Version' | sed -r 's/Version:\s([0-9]+.[0-9]+.[0-9]*).*/\1/g') >> /version.txt
 

@@ -30,6 +30,7 @@ RUN apt update && apt upgrade -y && \
         build-essential \
         python3-rosdep \
         python3-colcon-common-extensions && \
+    export SUDO_FORCE_REMOVE=yes && \
     apt autoremove -y && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*

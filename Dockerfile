@@ -25,12 +25,12 @@ RUN apt update && apt upgrade -y && \
     source /opt/ros/humble/setup.bash && \
     colcon build --symlink-install && \
     # clean to make the image smaller
+    export SUDO_FORCE_REMOVE=yes && \
 	apt remove -y \
         git \
         build-essential \
         python3-rosdep \
         python3-colcon-common-extensions && \
-    export SUDO_FORCE_REMOVE=yes && \
     apt autoremove -y && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*

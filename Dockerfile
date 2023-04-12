@@ -18,6 +18,7 @@ RUN apt update && apt upgrade -y && \
         python3-colcon-common-extensions \
         ros-$ROS_DISTRO-pointcloud-to-laserscan && \
     # building nav2
+    git clone --branch $ROS_DISTRO https://github.com/ros-planning/navigation2.git src/ && \
     rosdep init && \
     rosdep update --rosdistro $ROS_DISTRO && \
     rosdep install -y -r -q --from-paths src --rosdistro $ROS_DISTRO && \

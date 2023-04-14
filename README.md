@@ -18,3 +18,11 @@ Using in Docker Compose:
       ros2 launch nav2_bringup navigation_launch.py    
         params_file:=/nav2_params.yaml
 ```
+
+
+## Building locally for multiple architectures
+
+```bash
+sudo apt install -y qemu-user-static binfmt-support
+docker buildx build --platform linux/arm64,linux/amd64 -t nav2-test --build-arg PREFIX=vulcanexus- .
+```

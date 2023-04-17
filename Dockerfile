@@ -20,6 +20,11 @@ RUN apt update && apt upgrade -y && \
     # building nav2
     git clone --branch $ROS_DISTRO https://github.com/ros-planning/navigation2.git src/ && \
     rm -rf  /etc/ros/rosdep/sources.list.d/20-default.list && \
+    git -C src/ sparse-checkout set \
+        navigation2/** \
+        nav2_bringup/** \
+        nav2_msgs/** \
+        nav2_mppi_controller/**  && \
     rosdep init && \
     rosdep update --rosdistro $ROS_DISTRO && \
     rosdep install -y -r -q --from-paths src --rosdistro $ROS_DISTRO && \

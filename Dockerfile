@@ -23,8 +23,8 @@ RUN apt update && apt upgrade -y && \
     rosdep init && \
     rosdep update --rosdistro $ROS_DISTRO && \
     rosdep install -y -r -q --from-paths src --rosdistro $ROS_DISTRO && \
-    (MYDISTRO=${PREFIX_ENV:-ros}; MYDISTRO=${MYDISTRO//-/} && source /opt/$MYDISTRO/$ROS_DISTRO/setup.bash) && \
-    colcon build --symlink-install && \
+    (MYDISTRO=${PREFIX_ENV:-ros}; MYDISTRO=${MYDISTRO//-/} && source /opt/$MYDISTRO/$ROS_DISTRO/setup.bash && \
+    colcon build --symlink-install) && \
     # clean to make the image smaller
     export SUDO_FORCE_REMOVE=yes && \
 	apt remove -y \

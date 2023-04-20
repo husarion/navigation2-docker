@@ -50,3 +50,4 @@ RUN echo $(cat /ros2_ws/src/navigation2/package.xml | grep '<version>' | sed -r 
 HEALTHCHECK --interval=10s --timeout=10s --start-period=5s --retries=6  \
     CMD bash -c "source /opt/$([ -n "${PREFIX_ENV}" ] && echo "${PREFIX_ENV//-/}" || echo "ros")/$ROS_DISTRO/setup.bash && /healthcheck_$SLAM_MODE.py"
 
+#tip: gathering logs from healthcheck: docker inspect b39 | jq '.[0].State.Health.Log'

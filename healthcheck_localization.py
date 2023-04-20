@@ -1,7 +1,10 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 import rclpy
+import os
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from rclpy.qos import QoSProfile, QoSDurabilityPolicy
+
+print ("SLAM_MODE:" + os.environ.get("SLAM_MODE"))
 
 def callback(msg):
     print(f"received amcl_pose")

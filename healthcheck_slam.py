@@ -1,6 +1,9 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 import rclpy
+import os
 from nav2_msgs.srv import SaveMap
+
+print ("SLAM_MODE:" + os.environ.get("SLAM_MODE"))
 
 rclpy.init(args=[])
 node = rclpy.create_node("map_saver")

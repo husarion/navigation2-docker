@@ -28,8 +28,8 @@ RUN apt update && apt upgrade -y && \
     rosdep init && \
     rosdep update --rosdistro $ROS_DISTRO && \
     rosdep install -y -r -q --from-paths src --rosdistro $ROS_DISTRO && \
-    (MYDISTRO=${PREFIX_ENV:-ros}; MYDISTRO=${MYDISTRO//-/} && source /opt/$MYDISTRO/$ROS_DISTRO/setup.bash && \
-    colcon build --symlink-install) && \
+    source /opt/$([ -n "${PREFIX_ENV}" ] && echo "${PREFIX_ENV//-/}" || echo "ros")/$ROS_DISTRO/setup.bash && \
+    colcon build --symlink-install && \
     # clean to make the image smaller
     export SUDO_FORCE_REMOVE=yes && \
 	apt remove -y \
@@ -43,10 +43,10 @@ RUN apt update && apt upgrade -y && \
 
 COPY ./nav2_params /nav2_params
 
-COPY healthcheck_* /
+COPY --chmod=755 healthcheck_* /
 
 RUN echo $(cat /ros2_ws/src/navigation2/package.xml | grep '<version>' | sed -r 's/.*<version>([0-9]+.[0-9]+.[0-9]+)<\/version>/\1/g') > /version.txt
 
 HEALTHCHECK --interval=10s --timeout=10s --start-period=5s --retries=6  \
-    CMD bash -c "MYDISTRO=${PREFIX_ENV:-ros}; MYDISTRO=${MYDISTRO//-/} && source /opt/$MYDISTRO/$ROS_DISTRO/setup.bash && /healthcheck_$SLAM_MODE.py"
+    CMD bash -c "source /opt/$([ -n "${PREFIX_ENV}" ] && echo "${PREFIX_ENV//-/}" || echo "ros")/$ROS_DISTRO/setup.bash && /healthcheck_$SLAM_MODE.py"
 

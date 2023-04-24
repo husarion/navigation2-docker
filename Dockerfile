@@ -27,6 +27,7 @@ RUN apt update && apt upgrade -y && \
         nav2_msgs/** \
         nav2_mppi_controller/**  && \
     rosdep init && \
+    rosdep update && \
     rosdep install -y -r -q --from-paths src --rosdistro $ROS_DISTRO && \
     colcon build --symlink-install && \
     # clean to make the image smaller

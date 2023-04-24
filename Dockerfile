@@ -18,6 +18,7 @@ RUN apt update && apt upgrade -y && \
         python3-colcon-common-extensions \
         ros-$ROS_DISTRO-pointcloud-to-laserscan && \
     # building nav2
+    source /opt/$([ -n "${PREFIX_ENV}" ] && echo "${PREFIX_ENV//-/}" || echo "ros")/$ROS_DISTRO/setup.bash && \
     git clone --branch $ROS_DISTRO https://github.com/ros-planning/navigation2.git src/ && \
     rm -rf  /etc/ros/rosdep/sources.list.d/20-default.list && \
     git -C src/ sparse-checkout set \
@@ -26,10 +27,8 @@ RUN apt update && apt upgrade -y && \
         nav2_msgs/** \
         nav2_mppi_controller/**  && \
     rosdep init && \
-    rosdep update --rosdistro $ROS_DISTRO && \
     rosdep install -y -r -q --from-paths src --rosdistro $ROS_DISTRO && \
-    (source /opt/$([ -n "${PREFIX_ENV}" ] && echo "${PREFIX_ENV//-/}" || echo "ros")/$ROS_DISTRO/setup.bash && \
-    colcon build --symlink-install) && \
+    colcon build --symlink-install && \
     # clean to make the image smaller
     export SUDO_FORCE_REMOVE=yes && \
 	apt remove -y \

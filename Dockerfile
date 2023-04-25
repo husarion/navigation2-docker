@@ -29,7 +29,7 @@ RUN apt update && apt upgrade -y && \
     rosdep init && \
     rosdep update && \
     rosdep install -y -r -q --from-paths src --rosdistro $ROS_DISTRO && \
-    colcon build --symlink-install && \
+    colcon build --symlink-install --executor sequential && \
     # clean to make the image smaller
     export SUDO_FORCE_REMOVE=yes && \
 	apt remove -y \

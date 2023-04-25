@@ -23,13 +23,14 @@ RUN apt update && apt upgrade -y && \
     rm -rf  /etc/ros/rosdep/sources.list.d/20-default.list && \
     git -C src/ sparse-checkout set \
         navigation2/** \
+        nav2_mppi_controller/** \
         nav2_bringup/** \
-        nav2_msgs/** \
-        nav2_mppi_controller/**  && \
+        nav2_msgs/** && \
     rosdep init && \
     rosdep update && \
     rosdep install -y -r -q --from-paths src --rosdistro $ROS_DISTRO && \
-    colcon build --symlink-install --executor sequential && \
+    # colcon build --symlink-install --executor sequential && \
+    colcon build --symlink-install && \
     # clean to make the image smaller
     export SUDO_FORCE_REMOVE=yes && \
 	apt remove -y \
@@ -37,6 +38,7 @@ RUN apt update && apt upgrade -y && \
         build-essential \
         python3-rosdep \
         python3-colcon-common-extensions && \
+    # apt autoremove -y && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
 

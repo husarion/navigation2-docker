@@ -26,6 +26,7 @@ RUN apt update && apt upgrade -y && \
         nav2_mppi_controller/** \
         nav2_bringup/** \
         nav2_msgs/** && \
+    sleep 5 && \
     rosdep init && \
     rosdep update && \
     rosdep install -y -r -q --from-paths src --rosdistro $ROS_DISTRO && \
@@ -39,6 +40,7 @@ RUN apt update && apt upgrade -y && \
         python3-rosdep \
         python3-colcon-common-extensions && \
     # apt autoremove -y && \
+    sleep 5 && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
 

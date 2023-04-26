@@ -19,17 +19,16 @@ RUN apt update && apt upgrade -y && \
         ros-$ROS_DISTRO-pointcloud-to-laserscan && \
     # building nav2
     source /opt/$([ -n "${PREFIX_ENV}" ] && echo "${PREFIX_ENV//-/}" || echo "ros")/$ROS_DISTRO/setup.bash && \
-    git clone --branch $ROS_DISTRO https://github.com/ros-planning/navigation2.git src/ && \
+    git clone https://github.com/ros-planning/navigation2.git src/ --branch $ROS_DISTRO  && \
     rm -rf  /etc/ros/rosdep/sources.list.d/20-default.list && \
-    git -C src/ sparse-checkout set \
-        navigation2/** \
-        nav2_mppi_controller/** \
-        nav2_bringup/** \
-        nav2_msgs/** && \
-    sleep 5 && \
+    # git -C src/ sparse-checkout set \
+    #     navigation2/** \
+    #     nav2_mppi_controller/** \
+    #     nav2_bringup/** \
+    #     nav2_msgs/** && \
     rosdep init && \
     rosdep update && \
-    rosdep install -y -r -q --from-paths src --rosdistro $ROS_DISTRO && \
+    rosdep install -y -r -q --from-paths src --ignore-src --rosdistro $ROS_DISTRO && \
     # colcon build --symlink-install --executor sequential && \
     colcon build --symlink-install && \
     # clean to make the image smaller
@@ -40,7 +39,6 @@ RUN apt update && apt upgrade -y && \
         python3-rosdep \
         python3-colcon-common-extensions && \
     # apt autoremove -y && \
-    sleep 5 && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
 

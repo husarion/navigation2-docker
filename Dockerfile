@@ -9,38 +9,12 @@ ARG PREFIX
 ENV SLAM_MODE=localization
 ENV PREFIX_ENV=$PREFIX
 
-RUN apt update && apt upgrade -y && \
-    # install build tools
-    apt install -y \
-        git \
-        build-essential \
-        python3-rosdep \
-        python3-colcon-common-extensions \
+RUN apt update && apt upgrade -y && apt install -y \
+        ros-$ROS_DISTRO-navigation2 \
+        ros-$ROS_DISTRO-nav2-bringup \
         ros-$ROS_DISTRO-pointcloud-to-laserscan && \
-    # building nav2
-    source /opt/$([ -n "${PREFIX_ENV}" ] && echo "${PREFIX_ENV//-/}" || echo "ros")/$ROS_DISTRO/setup.bash && \
-    git clone --branch $ROS_DISTRO https://github.com/ros-planning/navigation2.git src/ && \
-    rm -rf  /etc/ros/rosdep/sources.list.d/20-default.list && \
-    git -C src/ sparse-checkout set \
-        navigation2/** \
-        nav2_mppi_controller/** \
-        nav2_bringup/** \
-        nav2_msgs/** && \
-    rosdep init && \
-    rosdep update && \
-    rosdep install -y -r -q --from-paths src --rosdistro $ROS_DISTRO && \
-    sed -i 's/target_link_libraries(\${lib} xtensor xtensor::optimize xtensor::use_xsimd)/target_link_libraries(\${lib} xtensor xtensor::use_xsimd)/' src/nav2_mppi_controller/CMakeLists.txt && \
-    # colcon build --symlink-install --executor sequential && \
-    colcon build --symlink-install && \
-    # clean to make the image smaller
-    export SUDO_FORCE_REMOVE=yes && \
-	apt remove -y \
-        git \
-        build-essential \
-        python3-rosdep \
-        python3-colcon-common-extensions && \
-    apt autoremove -y && \
-    apt clean && \
+    apt-get autoremove -y && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 COPY ./nav2_params /nav2_params

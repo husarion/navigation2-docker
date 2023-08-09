@@ -21,7 +21,7 @@ COPY ./nav2_params /nav2_params
 
 COPY --chmod=755 healthcheck_* /
 
-RUN echo $(cat /ros2_ws/src/navigation2/package.xml | grep '<version>' | sed -r 's/.*<version>([0-9]+.[0-9]+.[0-9]+)<\/version>/\1/g') > /version.txt
+RUN echo $(dpkg -s ros-$ROS_DISTRO-navigation2 | grep '<version>' | sed -r 's/.*<version>([0-9]+.[0-9]+.[0-9]+)<\/version>/\1/g') > /version.txt
 
 HEALTHCHECK --interval=10s --timeout=10s --start-period=5s --retries=6  \
     CMD bash -c "source /opt/$([ -n "${PREFIX_ENV}" ] && echo "${PREFIX_ENV//-/}" || echo "ros")/$ROS_DISTRO/setup.bash && /healthcheck_$SLAM_MODE.py"

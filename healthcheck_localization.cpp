@@ -4,7 +4,6 @@
 
 using namespace std::chrono_literals;
 
-#define TOPIC_NAME "/amcl_pose"
 #define TIMEOUT 2s
 
 int msg_received = EXIT_FAILURE;
@@ -28,7 +27,7 @@ int main(int argc, char* argv[])
   auto node = rclcpp::Node::make_shared("healthcheck_node");
   rclcpp::QoS qos(1);
   qos.transient_local();
-  auto sub = node->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(TOPIC_NAME, qos, msg_callback);
+  auto sub = node->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>("/amcl_pose", qos, msg_callback);
   auto timer = node->create_wall_timer(TIMEOUT, timeout_callback);
 
   rclcpp::spin(node);

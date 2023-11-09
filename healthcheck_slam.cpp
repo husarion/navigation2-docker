@@ -62,12 +62,5 @@ int main(int argc, char* argv[])
 
   rclcpp::spin(node);
 
-  if (msg_received && map_saved)
-  {
-    return EXIT_SUCCESS;
-  }
-  else
-  {
-    return EXIT_FAILURE;
-  }
+  return (msg_received && map_saved) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

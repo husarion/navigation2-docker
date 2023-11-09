@@ -1,3 +1,4 @@
+#include "cstdlib"
 #include "rclcpp/rclcpp.hpp"
 
 int main(int argc, char **argv) {
@@ -17,12 +18,13 @@ int main(int argc, char **argv) {
         }
     }
 
+    rclcpp::shutdown();
+
     if (bt_navigator_started) {
         std::cout << "Node '/bt_navigator' has started." << std::endl;
+        return EXIT_SUCCESS;
     } else {
         std::cout << "Node '/bt_navigator' has not started yet." << std::endl;
+        return EXIT_FAILURE;
     }
-
-    rclcpp::shutdown();
-    return 0;
 }

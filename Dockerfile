@@ -51,7 +51,7 @@ RUN source /opt/ros/$ROS_DISTRO/setup.bash && \
 
 RUN echo $(dpkg -s ros-$ROS_DISTRO-navigation2 | grep 'Version' | sed -r 's/Version:\s([0-9]+.[0-9]+.[0-9]+).*/\1/g') > /version.txt
 
-HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
+HEALTHCHECK --interval=20s --timeout=10s --start-period=10s --retries=3 \
     CMD bash -c "/ros_entrypoint.sh ros2 run healthcheck_pkg healthcheck_$SLAM_MODE"
 
 #tip: gathering logs from healthcheck: docker inspect b39 | jq '.[0].State.Health.Log'

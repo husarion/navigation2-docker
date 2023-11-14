@@ -28,12 +28,13 @@ RUN mkdir src && cd src/ && \
     sed -i '/find_package(std_msgs REQUIRED)/a \
             find_package(geometry_msgs REQUIRED)\n \
             find_package(nav2_msgs REQUIRED)\n \
+            find_package(bond REQUIRED)\n \
             add_executable(healthcheck_localization src/healthcheck_localization.cpp)\n \
             ament_target_dependencies(healthcheck_localization rclcpp std_msgs geometry_msgs)\n \
             add_executable(healthcheck_slam src/healthcheck_slam.cpp)\n \
             ament_target_dependencies(healthcheck_slam rclcpp std_msgs nav2_msgs)\n \
             add_executable(healthcheck_ src/healthcheck_navigation.cpp)\n \
-            ament_target_dependencies(healthcheck_ rclcpp std_msgs geometry_msgs)\n \
+            ament_target_dependencies(healthcheck_ rclcpp std_msgs bond)\n \
             install(TARGETS \
                 healthcheck_localization \
                 healthcheck_slam  \

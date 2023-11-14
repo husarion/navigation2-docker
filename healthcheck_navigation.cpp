@@ -1,30 +1,33 @@
-#include "cstdlib"
 #include "rclcpp/rclcpp.hpp"
+#include "bond/msg/status.hpp"
+#include "cstdlib"
 
-int main(int argc, char **argv) {
-    rclcpp::init(argc, argv);
+using namespace std::chrono_literals;
 
-    // Create a ROS node
-    auto node = std::make_shared<rclcpp::Node>("healthcheck_node");
+#define TIMEOUT 2s
 
-    // Get a list of active node names
-    auto node_names = node->get_node_names();
+int msg_received = EXIT_FAILURE;
 
-    bool bt_navigator_started = false;
-    for (const auto &name : node_names) {
-        if (name == "/bt_navigator") {
-            bt_navigator_started = true;
-            break;
-        }
-    }
+void msg_callback(const bond::msg::Status::SharedPtr msg)
+{
+  std::cout << "Message received" << std::endl;
+  msg_received = EXIT_SUCCESS;
+  rclcpp::shutdown();
+}
 
-    rclcpp::shutdown();
+void timeout_callback()
+{
+  std::cout << "Timeout" << std::endl;
+  rclcpp::shutdown();
+}
 
-    if (bt_navigator_started) {
-        std::cout << "Node '/bt_navigator' has started." << std::endl;
-        return EXIT_SUCCESS;
-    } else {
-        std::cout << "Node '/bt_navigator' has not started yet." << std::endl;
-        return EXIT_FAILURE;
-    }
+int main(int argc, char* argv[])
+{
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("healthcheck_node");
+  auto sub = node->create_subscription<bond::msg::Status>("/bond", rclcpp::SystemDefaultsQoS(), msg_callback);
+  auto timer = node->create_wall_timer(TIMEOUT, timeout_callback);
+
+  rclcpp::spin(node);
+  return msg_received;
 }

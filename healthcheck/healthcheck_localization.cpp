@@ -14,7 +14,6 @@ void write_health_status(const std::string& status)
 {
   std::ofstream healthFile("/health_status.txt");
   healthFile << status;
-  healthFile.close();
 }
 
 void msg_callback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr msg)

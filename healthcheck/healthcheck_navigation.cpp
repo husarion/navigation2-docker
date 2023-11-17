@@ -13,7 +13,6 @@ void write_health_status(const std::string& status)
 {
   std::ofstream healthFile("/health_status.txt");
   healthFile << status;
-  healthFile.close();
 }
 
 void msg_callback(const bond::msg::Status::SharedPtr msg)

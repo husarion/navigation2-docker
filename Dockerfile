@@ -30,11 +30,11 @@ RUN mkdir src && cd src/ && \
             find_package(nav2_msgs REQUIRED)\n \
             find_package(bond REQUIRED)\n \
             add_executable(healthcheck_localization src/healthcheck_localization.cpp)\n \
-            ament_target_dependencies(healthcheck_localization rclcpp std_msgs geometry_msgs)\n \
+            ament_target_dependencies(healthcheck_localization rclcpp geometry_msgs)\n \
             add_executable(healthcheck_slam src/healthcheck_slam.cpp)\n \
-            ament_target_dependencies(healthcheck_slam rclcpp std_msgs nav2_msgs)\n \
+            ament_target_dependencies(healthcheck_slam rclcpp nav2_msgs)\n \
             add_executable(healthcheck_ src/healthcheck_navigation.cpp)\n \
-            ament_target_dependencies(healthcheck_ rclcpp std_msgs bond)\n \
+            ament_target_dependencies(healthcheck_ rclcpp bond)\n \
             install(TARGETS \
                 healthcheck_localization \
                 healthcheck_slam  \
@@ -42,9 +42,7 @@ RUN mkdir src && cd src/ && \
                 DESTINATION lib/${PROJECT_NAME})' \
             /ros2_ws/src/healthcheck_pkg/CMakeLists.txt
 
-COPY ./healthcheck_localization.cpp /ros2_ws/src/healthcheck_pkg/src/
-COPY ./healthcheck_slam.cpp /ros2_ws/src/healthcheck_pkg/src/
-COPY ./healthcheck_navigation.cpp /ros2_ws/src/healthcheck_pkg/src/
+COPY ./healthcheck /ros2_ws/src/healthcheck_pkg/src
 
 # Build
 RUN source /opt/ros/$ROS_DISTRO/setup.bash && \
@@ -52,7 +50,8 @@ RUN source /opt/ros/$ROS_DISTRO/setup.bash && \
 
 RUN echo $(dpkg -s ros-$ROS_DISTRO-navigation2 | grep 'Version' | sed -r 's/Version:\s([0-9]+.[0-9]+.[0-9]+).*/\1/g') > /version.txt
 
-HEALTHCHECK --interval=20s --timeout=10s --start-period=10s --retries=3 \
-    CMD bash -c "/ros_entrypoint.sh ros2 run healthcheck_pkg healthcheck_$SLAM_MODE"
+COPY ./healthcheck/healthcheck.sh /
+HEALTHCHECK --interval=10s --timeout=2s --start-period=5s --retries=5 \
+    CMD ["/healthcheck.sh"]
 
 #tip: gathering logs from healthcheck: docker inspect b39 | jq '.[0].State.Health.Log'

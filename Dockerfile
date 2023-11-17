@@ -6,7 +6,7 @@ FROM husarnet/ros:${PREFIX}${ROS_DISTRO}-ros-base
 SHELL ["/bin/bash", "-c"]
 
 ARG PREFIX
-ENV SLAM_MODE=
+ENV SLAM_MODE=navigation
 ENV PREFIX_ENV=$PREFIX
 
 RUN apt update && apt upgrade -y && apt install -y \
@@ -31,14 +31,14 @@ RUN mkdir src && cd src/ && \
             find_package(bond REQUIRED)\n \
             add_executable(healthcheck_localization src/healthcheck_localization.cpp)\n \
             ament_target_dependencies(healthcheck_localization rclcpp geometry_msgs)\n \
+            add_executable(healthcheck_navigation src/healthcheck_navigation.cpp)\n \
+            ament_target_dependencies(healthcheck_navigation rclcpp bond)\n \
             add_executable(healthcheck_slam src/healthcheck_slam.cpp)\n \
             ament_target_dependencies(healthcheck_slam rclcpp nav2_msgs)\n \
-            add_executable(healthcheck_ src/healthcheck_navigation.cpp)\n \
-            ament_target_dependencies(healthcheck_ rclcpp bond)\n \
             install(TARGETS \
                 healthcheck_localization \
+                healthcheck_navigation \
                 healthcheck_slam  \
-                healthcheck_ \
                 DESTINATION lib/${PROJECT_NAME})' \
             /ros2_ws/src/healthcheck_pkg/CMakeLists.txt
 

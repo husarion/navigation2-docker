@@ -4,7 +4,7 @@ ARG PREFIX=
 ### BUILD IMAGE ###
 FROM husarnet/ros:${PREFIX}${ROS_DISTRO}-ros-base AS build
 
-RUN apt update && apt upgrade -y && apt install -y \
+RUN apt update && apt install -y \
         ros-$ROS_DISTRO-nav2-msgs
 
 # Create healthcheck package

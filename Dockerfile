@@ -59,7 +59,7 @@ COPY --from=build /ros2_ws/install /ros2_ws/install
 RUN echo $(dpkg -s ros-$ROS_DISTRO-navigation2 | grep 'Version' | sed -r 's/Version:\s([0-9]+.[0-9]+.[0-9]+).*/\1/g') > /version.txt
 
 COPY ./healthcheck/healthcheck.sh /
-HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=5 \
+HEALTHCHECK --interval=10s --timeout=8s --start-period=5s --retries=5 \
     CMD ["/healthcheck.sh"]
 
 #tip: gathering logs from healthcheck: docker inspect b39 | jq '.[0].State.Health.Log'

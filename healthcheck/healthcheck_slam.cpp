@@ -35,10 +35,8 @@ public:
         saved_map_elapsed_time.count() < SAVE_MAP_VALID_TIME.count();
 
     if (is_msg_valid && is_save_map_valid) {
-      RCLCPP_INFO(get_logger(), "Health check: healthy");
       writeHealthStatus("healthy");
     } else {
-      RCLCPP_WARN(get_logger(), "Health check: unhealthy");
       writeHealthStatus("unhealthy");
     }
   }

@@ -22,13 +22,9 @@ int main(int argc, char *argv[]) {
                                      node_to_find) != node_names.end();
 
     if (is_node_running) {
-      RCLCPP_INFO(node->get_logger(), "The %s node is running.",
-                  node_to_find.c_str());
       write_health_status("healthy");
 
     } else {
-      RCLCPP_WARN(node->get_logger(), "The %s node is not running.",
-                  node_to_find.c_str());
       write_health_status("unhealthy");
     }
     std::this_thread::sleep_for(LOOP_PERIOD);

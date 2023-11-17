@@ -8,8 +8,6 @@ using namespace std::chrono_literals;
 
 // State 'healthy' is latched, because topic 'amcl_pose' is transient_local and send only when moving.
 
-std::chrono::steady_clock::time_point last_msg_time;
-
 void write_health_status(const std::string& status)
 {
   std::ofstream healthFile("/health_status.txt");

@@ -17,7 +17,7 @@ void write_health_status(const std::string& status)
 
 void msg_callback(const bond::msg::Status::SharedPtr msg)
 {
-  write_health_status("healthy");
+  std::cout<<"Message received"<<std::endl;
   last_msg_time = std::chrono::steady_clock::now();
 }
 

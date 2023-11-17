@@ -5,7 +5,7 @@ ARG PREFIX=
 FROM husarnet/ros:${PREFIX}${ROS_DISTRO}-ros-base AS build
 
 RUN apt update && apt upgrade -y && apt install -y \
-        ros-$ROS_DISTRO-nav2-msgs \
+        ros-$ROS_DISTRO-nav2-msgs
 
 # Create healthcheck package
 WORKDIR /ros2_ws

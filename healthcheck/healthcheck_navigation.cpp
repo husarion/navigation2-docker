@@ -13,7 +13,7 @@ void write_health_status(const std::string &status) {
 int main(int argc, char *argv[]) {
   rclcpp::init(argc, argv);
   auto node = rclcpp::Node::make_shared("healthcheck_node");
-  std::string node_to_find = "/amcl";
+  std::string node_to_find = "/controller_server";
 
   while (rclcpp::ok()) {
     rclcpp::spin_some(node);

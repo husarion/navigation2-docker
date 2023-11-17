@@ -54,7 +54,7 @@ RUN apt update && apt upgrade -y && apt install -y \
     rm -rf /var/lib/apt/lists/*
 
 COPY ./nav2_params /nav2_params
-COPY --from=build /ros2_ws /ros2_ws
+COPY --from=build /ros2_ws/install /ros2_ws/install
 
 RUN echo $(dpkg -s ros-$ROS_DISTRO-navigation2 | grep 'Version' | sed -r 's/Version:\s([0-9]+.[0-9]+.[0-9]+).*/\1/g') > /version.txt
 

@@ -14,10 +14,9 @@ RUN mkdir src && cd src/ && \
     source /opt/ros/$ROS_DISTRO/setup.bash && \
     ros2 pkg create healthcheck_pkg --build-type ament_cmake --dependencies rclcpp std_msgs && \
     sed -i '/find_package(std_msgs REQUIRED)/a \
-            find_package(geometry_msgs REQUIRED)\n \
             find_package(nav2_msgs REQUIRED)\n \
             add_executable(healthcheck_localization src/healthcheck_localization.cpp)\n \
-            ament_target_dependencies(healthcheck_localization rclcpp geometry_msgs)\n \
+            ament_target_dependencies(healthcheck_localization rclcpp)\n \
             add_executable(healthcheck_navigation src/healthcheck_navigation.cpp)\n \
             ament_target_dependencies(healthcheck_navigation rclcpp)\n \
             add_executable(healthcheck_slam src/healthcheck_slam.cpp)\n \
@@ -58,7 +57,9 @@ COPY --from=build /ros2_ws/install /ros2_ws/install
 
 RUN echo $(dpkg -s ros-$ROS_DISTRO-navigation2 | grep 'Version' | sed -r 's/Version:\s([0-9]+.[0-9]+.[0-9]+).*/\1/g') > /version.txt
 
-COPY ./ros_entrypoint.sh /
+RUN sed -i '/test -f "\/ros2_ws\/install\/setup.bash" && source "\/ros2_ws\/install\/setup.bash"/a \
+        ros2 run healthcheck_pkg "healthcheck_$SLAM_MODE" &\
+        /ros_entrypoint.sh
 
 COPY ./healthcheck/healthcheck.sh /
 HEALTHCHECK --interval=7s --timeout=2s  --start-period=5s --retries=5 \

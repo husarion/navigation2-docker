@@ -12,10 +12,8 @@ WORKDIR /ros2_ws
 
 RUN mkdir src && cd src/ && \
     source /opt/ros/$ROS_DISTRO/setup.bash && \
-    ros2 pkg create healthcheck_pkg --build-type ament_cmake --dependencies rclcpp std_msgs && \
-    sed -i '/find_package(std_msgs REQUIRED)/a \
-            find_package(lifecycle_msgs REQUIRED)\n \
-            find_package(nav2_msgs REQUIRED)\n \
+    ros2 pkg create healthcheck_pkg --build-type ament_cmake --dependencies rclcpp lifecycle_msgs nav2_msgs && \
+    sed -i '/find_package(nav2_msgs REQUIRED)/a \
             add_executable(healthcheck_localization src/healthcheck_localization.cpp)\n \
             ament_target_dependencies(healthcheck_localization rclcpp lifecycle_msgs)\n \
             add_executable(healthcheck_navigation src/healthcheck_navigation.cpp)\n \

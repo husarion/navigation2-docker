@@ -3,6 +3,9 @@ ARG PREFIX=
 
 FROM husarnet/ros:${PREFIX}${ROS_DISTRO}-ros-core
 
+ENV SLAM_MODE=navigation
+ENV PREFIX_ENV=$PREFIX
+
 WORKDIR /ros2_ws
 
 COPY ./healthcheck /healthcheck
@@ -42,7 +45,7 @@ RUN MYDISTRO=${PREFIX:-ros}; MYDISTRO=${MYDISTRO//-/} && \
     rm -r /healthcheck && \
     cd .. && \
     # Build
-    colcon build --cmake-args  -DCMAKE_BUILD_TYPE=Release && \
+    colcon build && \
     # Make the image smaller
     export SUDO_FORCE_REMOVE=yes && \
     apt-get remove -y \

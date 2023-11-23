@@ -1,16 +1,29 @@
-ARG ROS_DISTRO=humble
+ARG ROS_DISTRO=iron
 ARG PREFIX=
 
-### BUILD IMAGE ###
-FROM husarnet/ros:${PREFIX}${ROS_DISTRO}-ros-base AS build
+FROM husarnet/ros:${PREFIX}${ROS_DISTRO}-ros-core
 
-RUN apt update && apt install -y \
-        ros-$ROS_DISTRO-nav2-msgs
-
-# Create healthcheck package
 WORKDIR /ros2_ws
 
-RUN mkdir src && cd src/ && \
+COPY ./healthcheck /healthcheck
+
+# Install everything needed
+RUN MYDISTRO=${PREFIX:-ros}; MYDISTRO=${MYDISTRO//-/} && \
+    apt-get update --fix-missing && apt-get install -y \
+        ros-dev-tools && \
+    # Clone source
+    git clone -b $ROS_DISTRO https://github.com/ros-planning/navigation2.git src && \
+    # Install dependencies
+    # no dependencies for iron on arm64
+    sed -i '/<exec_depend>turtlebot3_gazebo<\/exec_depend>/d' src/nav2_bringup/package.xml && \
+    sed -i '/<build_depend>gazebo_ros_pkgs<\/build_depend>/d' src/nav2_system_tests/package.xml && \
+    sed -i '/<exec_depend>gazebo_ros_pkgs<\/exec_depend>/d' src/nav2_system_tests/package.xml && \
+    rm -rf /etc/ros/rosdep/sources.list.d/20-default.list && \
+    rosdep init && \
+    rosdep update --rosdistro $ROS_DISTRO && \
+    rosdep install -i --from-path src --rosdistro $ROS_DISTRO -y
+    # Create healthcheck package
+RUN cd src/ && \
     source /opt/ros/$ROS_DISTRO/setup.bash && \
     ros2 pkg create healthcheck_pkg --build-type ament_cmake --dependencies rclcpp lifecycle_msgs nav2_msgs && \
     sed -i '/find_package(nav2_msgs REQUIRED)/a \
@@ -25,43 +38,31 @@ RUN mkdir src && cd src/ && \
                 healthcheck_navigation \
                 healthcheck_slam  \
                 DESTINATION lib/${PROJECT_NAME})' \
-            /ros2_ws/src/healthcheck_pkg/CMakeLists.txt
-
-COPY ./healthcheck /ros2_ws/src/healthcheck_pkg/src
-
-# Build
+            /ros2_ws/src/healthcheck_pkg/CMakeLists.txt && \
+    mv /healthcheck/* /ros2_ws/src/healthcheck_pkg/src/ && \
+    rm -r /healthcheck && \
+    cd ..
+    # Build
 RUN source /opt/ros/$ROS_DISTRO/setup.bash && \
-    colcon build --event-handlers  console_direct+  --cmake-args  -DCMAKE_BUILD_TYPE=Release
-
-### RUNTIME IMAGE ###
-FROM husarnet/ros:${PREFIX}${ROS_DISTRO}-ros-core
-
-ARG PREFIX
-ENV SLAM_MODE=navigation
-ENV PREFIX_ENV=$PREFIX
-
-WORKDIR /ros2_ws
-
-RUN apt update && apt upgrade -y && apt install -y \
-        ros-$ROS_DISTRO-navigation2 \
-        ros-$ROS_DISTRO-nav2-bringup \
-        ros-$ROS_DISTRO-pointcloud-to-laserscan && \
-    mkdir /maps && \
+    colcon build --event-handlers  console_direct+  --cmake-args  -DCMAKE_BUILD_TYPE=Release && \
+    # Make the image smaller
+    export SUDO_FORCE_REMOVE=yes && \
+    apt-get remove -y \
+        ros-dev-tools && \
     apt-get autoremove -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-COPY ./nav2_params /nav2_params
-COPY --from=build /ros2_ws/install /ros2_ws/install
+# COPY ./nav2_params /nav2_params
 
-RUN echo $(dpkg -s ros-$ROS_DISTRO-navigation2 | grep 'Version' | sed -r 's/Version:\s([0-9]+.[0-9]+.[0-9]+).*/\1/g') > /version.txt
+# RUN echo $(dpkg -s ros-$ROS_DISTRO-navigation2 | grep 'Version' | sed -r 's/Version:\s([0-9]+.[0-9]+.[0-9]+).*/\1/g') > /version.txt
 
-RUN sed -i '/test -f "\/ros2_ws\/install\/setup.bash" && source "\/ros2_ws\/install\/setup.bash"/a \
-        ros2 run healthcheck_pkg "healthcheck_$SLAM_MODE" &' \
-        /ros_entrypoint.sh
+# RUN sed -i '/test -f "\/ros2_ws\/install\/setup.bash" && source "\/ros2_ws\/install\/setup.bash"/a \
+#         ros2 run healthcheck_pkg "healthcheck_$SLAM_MODE" &' \
+#         /ros_entrypoint.sh
 
-COPY ./healthcheck/healthcheck.sh /
-HEALTHCHECK --interval=7s --timeout=2s  --start-period=5s --retries=5 \
-    CMD ["/healthcheck.sh"]
+# COPY ./healthcheck/healthcheck.sh /
+# HEALTHCHECK --interval=7s --timeout=2s  --start-period=5s --retries=5 \
+#     CMD ["/healthcheck.sh"]
 
-#tip: gathering logs from healthcheck: docker inspect b39 | jq '.[0].State.Health.Log'
+# #tip: gathering logs from healthcheck: docker inspect b39 | jq '.[0].State.Health.Log'

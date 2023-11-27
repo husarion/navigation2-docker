@@ -36,7 +36,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ros-distro: [ "humble" , "iron"]
+        ros-distro: [ "humble" ] # iron is not supported on arm
 
     steps:
 

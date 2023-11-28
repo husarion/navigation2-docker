@@ -79,7 +79,7 @@ private:
   std::chrono::steady_clock::time_point last_saved_map_time;
 
   void writeHealthStatus(const std::string &status) {
-    std::ofstream healthFile("/health_status.txt");
+    std::ofstream healthFile("/var/tmp/health_status.txt");
     healthFile << status;
   }
 

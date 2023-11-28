@@ -5,7 +5,7 @@
 using namespace std::chrono_literals;
 
 void write_health_status(const std::string &status) {
-  std::ofstream healthFile("/health_status.txt");
+  std::ofstream healthFile("/var/tmp/health_status.txt");
   healthFile << status;
 }
 

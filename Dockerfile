@@ -15,11 +15,11 @@ RUN MYDISTRO=${PREFIX:-ros}; MYDISTRO=${MYDISTRO//-/} && \
     apt-get update --fix-missing && apt-get install -y \
         ros-dev-tools && \
     # Clone source
-    git clone -b $ROS_DISTRO https://github.com/ros-planning/navigation2.git src && \
+    git clone -b $ROS_DISTRO https://github.com/ros-planning/navigation2.git src/navigation2 && \
     # Install dependencies
     # no dependencies for iron on arm64
-    sed -i '/<exec_depend>turtlebot3_gazebo<\/exec_depend>/d' src/nav2_bringup/package.xml && \
-    rm -r src/nav2_system_tests/ && \
+    cp src/navigation2/nav2_mppi_controller src/ &&\
+    rm -rf src/navigation2/ && \
     rm -rf /etc/ros/rosdep/sources.list.d/20-default.list && \
     rosdep init && \
     rosdep update --rosdistro $ROS_DISTRO && \

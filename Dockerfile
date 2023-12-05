@@ -18,7 +18,10 @@ RUN MYDISTRO=${PREFIX:-ros}; MYDISTRO=${MYDISTRO//-/} && \
     git clone -b $ROS_DISTRO https://github.com/ros-planning/navigation2.git src/navigation2 && \
     # Install dependencies
     # no dependencies for iron on arm64
+    cp -r src/navigation2/nav2_bringup src/ &&\
+    cp -r src/navigation2/nav2_dwb_controller src/ &&\
     cp -r src/navigation2/nav2_mppi_controller src/ &&\
+    cp -r src/navigation2/nav2_regulated_pure_pursuit_controller src/ &&\
     rm -rf src/navigation2/ && \
     rm -rf /etc/ros/rosdep/sources.list.d/20-default.list && \
     rosdep init && \

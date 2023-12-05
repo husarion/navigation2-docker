@@ -1,4 +1,4 @@
-ARG ROS_DISTRO=iron
+ARG ROS_DISTRO=humble
 ARG PREFIX=
 
 FROM husarnet/ros:${PREFIX}${ROS_DISTRO}-ros-core
@@ -12,17 +12,16 @@ COPY ./healthcheck /healthcheck
 
 # Install everything needed
 RUN MYDISTRO=${PREFIX:-ros}; MYDISTRO=${MYDISTRO//-/} && \
-    apt-get update --fix-missing && apt-get install -y \
+    apt-get update --fix-missing && \
+    apt upgrade -y && \
+    apt-get install -y \
         ros-dev-tools && \
     # Clone source
     git clone -b $ROS_DISTRO https://github.com/ros-planning/navigation2.git src/navigation2 && \
-    # Install dependencies
-    # no dependencies for iron on arm64
-    cp -r src/navigation2/nav2_bringup src/ &&\
-    cp -r src/navigation2/nav2_dwb_controller src/ &&\
+    # Build MPPI
     cp -r src/navigation2/nav2_mppi_controller src/ &&\
-    cp -r src/navigation2/nav2_regulated_pure_pursuit_controller src/ &&\
     rm -rf src/navigation2/ && \
+    # Install dependencies
     rm -rf /etc/ros/rosdep/sources.list.d/20-default.list && \
     rosdep init && \
     rosdep update --rosdistro $ROS_DISTRO && \
@@ -49,6 +48,9 @@ RUN MYDISTRO=${PREFIX:-ros}; MYDISTRO=${MYDISTRO//-/} && \
     cd .. && \
     # Build
     colcon build && \
+    apt install -y \
+        ros-$ROS_DISTRO-navigation2 \
+        ros-$ROS_DISTRO-nav2-bringup && \
     # Make the image smaller
     export SUDO_FORCE_REMOVE=yes && \
     apt-get remove -y \

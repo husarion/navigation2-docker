@@ -44,14 +44,17 @@ RUN MYDISTRO=${PREFIX:-ros}; MYDISTRO=${MYDISTRO//-/} && \
                 DESTINATION lib/${PROJECT_NAME})' \
             /ros2_ws/src/healthcheck_pkg/CMakeLists.txt && \
     mv /healthcheck/* /ros2_ws/src/healthcheck_pkg/src/ && \
-    rm -r /healthcheck && \
+    rm -rf /healthcheck && \
     cd .. && \
     # Build
-    colcon build && \
+    colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release && \
     apt install -y \
         ros-$ROS_DISTRO-navigation2 \
         ros-$ROS_DISTRO-nav2-bringup && \
-    # Make the image smaller
+    # Save version
+    echo $(dpkg -s ros-$ROS_DISTRO-navigation2 | grep 'Version' | sed -r 's/Version:\s([0-9]+.[0-9]+.[0-9]+).*/\1/g') > /version.txt && \
+    # Size optimalization
+    rm -rf build log src && \    
     export SUDO_FORCE_REMOVE=yes && \
     apt-get remove -y \
         ros-dev-tools && \
@@ -61,14 +64,13 @@ RUN MYDISTRO=${PREFIX:-ros}; MYDISTRO=${MYDISTRO//-/} && \
 
 COPY ./nav2_params /nav2_params
 
-RUN echo $(dpkg -s ros-$ROS_DISTRO-navigation2 | grep 'Version' | sed -r 's/Version:\s([0-9]+.[0-9]+.[0-9]+).*/\1/g') > /version.txt
 
 RUN sed -i '/test -f "\/ros2_ws\/install\/setup.bash" && source "\/ros2_ws\/install\/setup.bash"/a \
         ros2 run healthcheck_pkg "healthcheck_$SLAM_MODE" &' \
         /ros_entrypoint.sh
 
 COPY ./healthcheck/healthcheck.sh /
-HEALTHCHECK --interval=7s --timeout=2s  --start-period=5s --retries=5 \
+HEALTHCHECK --interval=5s --timeout=2s  --start-period=5s --retries=4 \
     CMD ["/healthcheck.sh"]
 
 # #tip: gathering logs from healthcheck: docker inspect b39 | jq '.[0].State.Health.Log'

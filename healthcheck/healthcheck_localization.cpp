@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
   auto node = rclcpp::Node::make_shared("healthcheck_node");
 
   auto sub = node->create_subscription<lifecycle_msgs::msg::TransitionEvent>(
-      "amcl/transition_event", rclcpp::SystemDefaultsQoS(),
+      "amcl/transition_event", rclcpp::SystemDefaultsQoS().keep_last(1),
       msg_callback);
 
   rclcpp::spin(node);

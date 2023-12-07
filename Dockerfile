@@ -3,6 +3,7 @@ ARG PREFIX=
 
 FROM husarnet/ros:${PREFIX}${ROS_DISTRO}-ros-core
 
+ARG PREFIX
 ENV SLAM_MODE=navigation
 ENV PREFIX_ENV=$PREFIX
 
@@ -57,10 +58,15 @@ RUN MYDISTRO=${PREFIX:-ros}; MYDISTRO=${MYDISTRO//-/} && \
 
 COPY ./nav2_params /nav2_params
 
-
-RUN sed -i '/test -f "\/ros2_ws\/install\/setup.bash" && source "\/ros2_ws\/install\/setup.bash"/a \
+RUN if [ -f "/ros_entrypoint.sh" ]; then \
+        sed -i '/test -f "\/ros2_ws\/install\/setup.bash" && source "\/ros2_ws\/install\/setup.bash"/a \
         ros2 run healthcheck_pkg healthcheck_node &' \
-        /ros_entrypoint.sh
+        /ros_entrypoint.sh; \
+    else \
+        sed -i '/test -f "\/ros2_ws\/install\/setup.bash" && source "\/ros2_ws\/install\/setup.bash"/a \
+        ros2 run healthcheck_pkg healthcheck_node &' \
+        /vulcanexus_entrypoint.sh; \
+    fi
 
 COPY ./healthcheck.sh /
 HEALTHCHECK --interval=5s --timeout=2s  --start-period=5s --retries=4 \

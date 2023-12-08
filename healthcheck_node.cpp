@@ -69,7 +69,7 @@ public:
     if (saveMapPeriod != 0s) {
       if (elapsed_time > saveMapPeriod) {
         if (save_map_client_->wait_for_service(SAVE_MAP_CONNECTION_TIMEOUT)) {
-          RCLCPP_DEBUG(get_logger(), "Service available");
+          RCLCPP_DEBUG(get_logger(), "/map_saver/save_map service available");
           auto request = std::make_shared<nav2_msgs::srv::SaveMap::Request>();
           request->free_thresh = 0.25;
           request->occupied_thresh = 0.65;
@@ -89,7 +89,7 @@ public:
             RCLCPP_WARN(get_logger(), "/map_saver/save_map service response didn't arrived");
           }
         } else {
-          RCLCPP_WARN(get_logger(), "/map_saver/save_map service unavailable");
+          RCLCPP_DEBUG(get_logger(), "/map_saver/save_map service unavailable");
         }
       }
     }

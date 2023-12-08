@@ -4,7 +4,6 @@ ARG PREFIX=
 FROM husarnet/ros:${PREFIX}${ROS_DISTRO}-ros-core
 
 ARG PREFIX
-ENV SLAM_MODE=navigation
 ENV PREFIX_ENV=$PREFIX
 
 WORKDIR /ros2_ws

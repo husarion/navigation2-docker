@@ -15,11 +15,12 @@ using namespace std::chrono_literals;
 class HealthCheckNode : public rclcpp::Node {
 public:
   HealthCheckNode()
-      : Node("healthcheck_node"), map_exist(false),
+      : Node("healthcheck_navigation"), map_exist(false),
         is_controller_active(false) {
 
     rclcpp::QoS qos(1);
-    qos.transient_local().reliable();
+    qos.transient_local();
+    qos.reliable();
     map_subscriber_ = create_subscription<nav_msgs::msg::OccupancyGrid>(
         "/map", qos,
         std::bind(&HealthCheckNode::mapCallback, this, std::placeholders::_1));
@@ -65,7 +66,7 @@ public:
     static steady_clock::time_point last_saved_map_time = steady_clock::now();
     auto elapsed_time = steady_clock::now() - last_saved_map_time;
 
-    if (saveMapPeriod == 0s) {
+    if (saveMapPeriod != 0s) {
       if (elapsed_time > saveMapPeriod) {
         if (save_map_client_->wait_for_service(SAVE_MAP_CONNECTION_TIMEOUT)) {
           RCLCPP_DEBUG(get_logger(), "Service available");
@@ -85,10 +86,10 @@ public:
             RCLCPP_INFO(get_logger(), "Map saved");
             last_saved_map_time = steady_clock::now();
           } else {
-            RCLCPP_WARN(get_logger(), "Service response didn't arrived");
+            RCLCPP_WARN(get_logger(), "/map_saver/save_map service response didn't arrived");
           }
         } else {
-          RCLCPP_WARN(get_logger(), "Service unavailable");
+          RCLCPP_WARN(get_logger(), "/map_saver/save_map service unavailable");
         }
       }
     }

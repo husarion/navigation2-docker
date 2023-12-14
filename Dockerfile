@@ -4,11 +4,10 @@ ARG PREFIX=
 FROM husarnet/ros:${PREFIX}${ROS_DISTRO}-ros-core
 
 ARG PREFIX
-ENV PREFIX_ENV=$PREFIX
 
 WORKDIR /ros2_ws
 
-COPY ./healthcheck_node.cpp /
+COPY ./healthcheck.cpp /
 
 # Install everything needed
 RUN MYDISTRO=${PREFIX:-ros}; MYDISTRO=${MYDISTRO//-/} && \
@@ -26,13 +25,13 @@ RUN MYDISTRO=${PREFIX:-ros}; MYDISTRO=${MYDISTRO//-/} && \
     source "/opt/$MYDISTRO/$ROS_DISTRO/setup.bash" && \
     ros2 pkg create healthcheck_pkg --build-type ament_cmake --dependencies rclcpp lifecycle_msgs nav_msgs nav2_msgs && \
     sed -i '/find_package(nav2_msgs REQUIRED)/a \
-            add_executable(healthcheck_node src/healthcheck_node.cpp)\n \
+            add_executable(healthcheck_node src/healthcheck.cpp)\n \
             ament_target_dependencies(healthcheck_node rclcpp lifecycle_msgs nav_msgs nav2_msgs)\n \
             install(TARGETS \
                 healthcheck_node \
                 DESTINATION lib/${PROJECT_NAME})' \
             /ros2_ws/src/healthcheck_pkg/CMakeLists.txt && \
-    mv /healthcheck_node.cpp /ros2_ws/src/healthcheck_pkg/src/ && \
+    mv /healthcheck.cpp /ros2_ws/src/healthcheck_pkg/src/ && \
     cd .. && \
     # Install dependencies
     rm -rf /etc/ros/rosdep/sources.list.d/20-default.list && \

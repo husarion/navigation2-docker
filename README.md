@@ -3,8 +3,7 @@
 Building a Docker image with Navigation 2.
 
 Available for ROS distros:
-- ROS 2 galactic
-- ROS 2 humble
+- ROS 2 Humble
 
 Using in Docker Compose:
 
@@ -12,10 +11,10 @@ Using in Docker Compose:
   nav2:
     image: husarion/navigation2:humble
     restart: unless-stopped
-    volumes: 
+    volumes:
       - ./config/nav2_params.yaml:/nav2_params.yaml
     command: >
-      ros2 launch nav2_bringup navigation_launch.py    
+      ros2 launch nav2_bringup navigation_launch.py
         params_file:=/nav2_params.yaml
 ```
 

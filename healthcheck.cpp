@@ -49,8 +49,8 @@ public:
       }
     } else {
       saveMapPeriod = duration<double>(0s);
-      RCLCPP_INFO(get_logger(),
-                  "SAVE_MAP_PERIOD environment variable not set.");
+      RCLCPP_INFO(get_logger(), "SAVE_MAP_PERIOD environment variable not set. "
+                                "Autosave save map disable.");
     }
   }
 
@@ -86,7 +86,8 @@ public:
             RCLCPP_INFO(get_logger(), "Map saved");
             last_saved_map_time = steady_clock::now();
           } else {
-            RCLCPP_WARN(get_logger(), "/map_saver/save_map service response didn't arrived");
+            RCLCPP_WARN(get_logger(),
+                        "/map_saver/save_map service response didn't arrived");
           }
         } else {
           RCLCPP_DEBUG(get_logger(), "/map_saver/save_map service unavailable");

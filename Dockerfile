@@ -9,6 +9,7 @@ WORKDIR /ros2_ws
 
 COPY ./healthcheck.cpp /
 
+# In version 1.0.12 MPPI doesn't work on RPi4 (build from source)
 # Install everything needed
 RUN MYDISTRO=${PREFIX:-ros}; MYDISTRO=${MYDISTRO//-/} && \
     apt-get update --fix-missing && \
@@ -54,8 +55,6 @@ RUN MYDISTRO=${PREFIX:-ros}; MYDISTRO=${MYDISTRO//-/} && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-COPY ./nav2_params /nav2_params
-
 RUN entrypoint_file=$(if [ -f "/ros_entrypoint.sh" ]; then echo "/ros_entrypoint.sh"; else echo "/vulcanexus_entrypoint.sh"; fi) && \
     sed -i '/test -f "\/ros2_ws\/install\/setup.bash" && source "\/ros2_ws\/install\/setup.bash"/a \
             ros2 run healthcheck_pkg healthcheck_node &' \
@@ -64,5 +63,3 @@ RUN entrypoint_file=$(if [ -f "/ros_entrypoint.sh" ]; then echo "/ros_entrypoint
 COPY ./healthcheck.sh /
 HEALTHCHECK --interval=5s --timeout=2s  --start-period=5s --retries=4 \
     CMD ["/healthcheck.sh"]
-
-# #tip: gathering logs from healthcheck: docker inspect b39 | jq '.[0].State.Health.Log'

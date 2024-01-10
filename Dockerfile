@@ -7,7 +7,7 @@ ARG PREFIX
 
 WORKDIR /ros2_ws
 
-COPY ./healthcheck.cpp /
+COPY ./husarion_utils/healthcheck.cpp /husarion_utils/healthcheck.cpp
 
 # In version 1.0.12 MPPI doesn't work on RPi4 (build from source)
 # Install everything needed
@@ -32,7 +32,7 @@ RUN MYDISTRO=${PREFIX:-ros}; MYDISTRO=${MYDISTRO//-/} && \
                 healthcheck_node \
                 DESTINATION lib/${PROJECT_NAME})' \
             /ros2_ws/src/healthcheck_pkg/CMakeLists.txt && \
-    mv /healthcheck.cpp /ros2_ws/src/healthcheck_pkg/src/ && \
+    mv /husarion_utils/healthcheck.cpp /ros2_ws/src/healthcheck_pkg/src/ && \
     cd .. && \
     # Install dependencies
     rm -rf /etc/ros/rosdep/sources.list.d/20-default.list && \
@@ -55,11 +55,6 @@ RUN MYDISTRO=${PREFIX:-ros}; MYDISTRO=${MYDISTRO//-/} && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN entrypoint_file=$(if [ -f "/ros_entrypoint.sh" ]; then echo "/ros_entrypoint.sh"; else echo "/vulcanexus_entrypoint.sh"; fi) && \
-    sed -i '/test -f "\/ros2_ws\/install\/setup.bash" && source "\/ros2_ws\/install\/setup.bash"/a \
-            ros2 run healthcheck_pkg healthcheck_node &' \
-            $entrypoint_file
-
-COPY ./healthcheck.sh /
-HEALTHCHECK --interval=5s --timeout=2s  --start-period=5s --retries=4 \
-    CMD ["/healthcheck.sh"]
+COPY ./husarion_utils /husarion_utils
+HEALTHCHECK --interval=2s --timeout=1s --start-period=30s --retries=2 \
+    CMD ["/husarion_utils/healthcheck.sh"]

@@ -22,7 +22,7 @@ public:
     qos.transient_local();
     qos.reliable();
     map_subscriber_ = create_subscription<nav_msgs::msg::OccupancyGrid>(
-        "/map", qos,
+        "map", qos,
         std::bind(&HealthCheckNode::mapCallback, this, std::placeholders::_1));
 
     controller_subscriber_ =
@@ -69,11 +69,11 @@ public:
     if (saveMapPeriod != 0s) {
       if (elapsed_time > saveMapPeriod) {
         if (save_map_client_->wait_for_service(SAVE_MAP_CONNECTION_TIMEOUT)) {
-          RCLCPP_DEBUG(get_logger(), "/map_saver/save_map service available");
+          RCLCPP_DEBUG(get_logger(), "map_saver/save_map service available");
           auto request = std::make_shared<nav2_msgs::srv::SaveMap::Request>();
           request->free_thresh = 0.25;
           request->occupied_thresh = 0.65;
-          request->map_topic = "/map";
+          request->map_topic = "map";
           request->map_url = "/maps/map";
           request->map_mode = "trinary";
           request->image_format = "png";
@@ -87,10 +87,10 @@ public:
             last_saved_map_time = steady_clock::now();
           } else {
             RCLCPP_WARN(get_logger(),
-                        "/map_saver/save_map service response didn't arrived");
+                        "save_map service response didn't arrived");
           }
         } else {
-          RCLCPP_DEBUG(get_logger(), "/map_saver/save_map service unavailable");
+          RCLCPP_DEBUG(get_logger(), "save_map service unavailable");
         }
       }
     }

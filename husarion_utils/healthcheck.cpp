@@ -32,9 +32,18 @@ public:
                       std::placeholders::_1));
 
     save_map_client_ =
-        create_client<nav2_msgs::srv::SaveMap>("/map_saver/save_map");
+        create_client<nav2_msgs::srv::SaveMap>("map_saver/save_map");
 
-    // Read the environment variable
+    // Read the ROBOT_NAMESPACE environment variable
+    const char *robotNamespaceEnv = std::getenv("ROBOT_NAMESPACE");
+    ns_prefix = (robotNamespaceEnv != nullptr)
+                    ? "/" + std::string(robotNamespaceEnv)
+                    : "";
+    if (!ns_prefix.empty()) {
+      RCLCPP_INFO(get_logger(), "ROBOT_NAMESPACE: %s", ns_prefix.c_str());
+    }
+
+    // Read the SAVE_MAP_PERIOD environment variable
     const char *saveMapPeriodEnv = std::getenv("SAVE_MAP_PERIOD");
     if (saveMapPeriodEnv != nullptr) {
       try {
@@ -73,7 +82,7 @@ public:
           auto request = std::make_shared<nav2_msgs::srv::SaveMap::Request>();
           request->free_thresh = 0.25;
           request->occupied_thresh = 0.65;
-          request->map_topic = "map";
+          request->map_topic = ns_prefix + "/map";
           request->map_url = "/maps/map";
           request->map_mode = "trinary";
           request->image_format = "png";
@@ -100,6 +109,7 @@ private:
   bool map_exist;
   bool is_controller_active;
   duration<double> saveMapPeriod;
+  std::string ns_prefix;
 
   rclcpp::Subscription<nav_msgs::msg::OccupancyGrid>::SharedPtr map_subscriber_;
   rclcpp::Subscription<lifecycle_msgs::msg::TransitionEvent>::SharedPtr

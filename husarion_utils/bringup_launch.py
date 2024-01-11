@@ -121,18 +121,18 @@ def launch_setup(context, *args, **kwargs):
                     "container_name": "nav2_container",
                 }.items(),
             ),
-            # Health check
-            Node(
-                package="healthcheck_pkg",
-                executable="healthcheck_node",
-                name="healthcheck_navigation",
-                namespace=namespace,
-                output="screen",
-            ),
         ]
     )
 
-    return [bringup_cmd_group]
+    healthcheck_node = Node(
+        package="healthcheck_pkg",
+        executable="healthcheck_node",
+        name="healthcheck_navigation",
+        namespace=namespace,
+        output="screen",
+    )
+
+    return [bringup_cmd_group, healthcheck_node]
 
 
 def generate_launch_description():

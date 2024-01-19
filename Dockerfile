@@ -56,5 +56,5 @@ RUN MYDISTRO=${PREFIX:-ros}; MYDISTRO=${MYDISTRO//-/} && \
     rm -rf /var/lib/apt/lists/*
 
 COPY ./husarion_utils /husarion_utils
-HEALTHCHECK --interval=2s --timeout=1s --start-period=30s --retries=2 \
+HEALTHCHECK --interval=2s --timeout=1s --start-period=45s --retries=2 \
     CMD ["/husarion_utils/healthcheck.sh"]

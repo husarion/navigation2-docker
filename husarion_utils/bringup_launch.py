@@ -37,6 +37,7 @@ def launch_setup(context, *args, **kwargs):
 
     # Create the launch configuration variables
     namespace = LaunchConfiguration("namespace").perform(context)
+    point_cloud2_topic = LaunchConfiguration("point_cloud2_topic").perform(context)
     map_yaml_file = LaunchConfiguration("map").perform(context)
     use_sim_time = LaunchConfiguration("use_sim_time").perform(context)
     params_file = LaunchConfiguration("params_file").perform(context)
@@ -59,6 +60,10 @@ def launch_setup(context, *args, **kwargs):
         params_file = ReplaceString(
             source_file=params_file, replacements={"<robot_namespace>/": ""}
         )
+
+    params_file = ReplaceString(
+        source_file=params_file, replacements={"<point_cloud2_topic>": point_cloud2_topic}
+    )
 
     configured_params = ParameterFile(
         RewrittenYaml(
@@ -143,6 +148,11 @@ def generate_launch_description():
                 "namespace",
                 default_value=EnvironmentVariable("ROBOT_NAMESPACE", default_value=""),
                 description="Top-level namespace",
+            ),
+            DeclareLaunchArgument(
+                "point_cloud2_topic",
+                default_value="",
+                description="Topic name for PointCloud2 messages.",
             ),
             DeclareLaunchArgument("slam", default_value="False", description="Whether run a SLAM"),
             DeclareLaunchArgument("map", description="Full path to map yaml file to load"),
